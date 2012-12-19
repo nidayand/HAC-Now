@@ -7,6 +7,11 @@ var serverBaseURL = "http://localhost/HAC%20Server/";
  * Namespace for hac functions
  */
 var hac = {
+		/** Polls the server for updated information that is to 
+		 * be displayed in the UI.
+		 * @param svc Optional parameter. Only poll data for a specific service
+		 * @param loaddata Optional parameter. If used, svc is mandatory. Before data is retrieved, the call will update the data for the service (data_load)
+		 */
 		getData: function (svc, loaddata){
 			var url = serverBaseURL+'data.php';
 			if (typeof svc !== "undefined")
@@ -26,6 +31,10 @@ var hac = {
 				hac.sort();
 			});
 		},
+		/** Inserts or updates an item into the UI. Is called from getData.
+		 * An update is only made if the timestamp differs
+		 * @param data Object to be inserted/updated
+		 */	
 		updateItem: function(data){
 			//Check for id of service
 			if ($("#"+data.service).length === 0){
@@ -44,12 +53,18 @@ var hac = {
 				item.content($("#"+data.service), data.ui, data.data);
 			}
 		},
+		/** Deletes an object from the UI
+		 * @param data Object to be removed
+		 */		
 		deleteItem: function(data){
 			$("#"+data.service).fadeOut("slow", function(){
 					$("#"+data.service).infobox("destroy");
 					this.remove();
 			});
 		},
+		/** Sorts the objects in the UI based on the priority setting
+		 * of the infobox widget
+		 */			
 		sort: function(){
 			//Sort
 			$('div[id$="_hacsvc"]').sortElements(function(a,b){
@@ -80,7 +95,10 @@ var js = {
 		}
 };
 
-
+/*
+ * Methods that are to start upon complete loading of the page
+ * It will poll for data as well as set the schedulers
+ */
 $(document).ready(function(){
 	//Set data load interval
 	var url = serverBaseURL+'getkvp.php?key=data_load';
