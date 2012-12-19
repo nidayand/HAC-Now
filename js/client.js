@@ -1,7 +1,7 @@
 /*
  * Global configuration
  */
-var serverBaseURL = "http://localhost/HAC%20Server/";
+var serverBaseURL = "http://10.0.1.23/HAC%20Server/";
 
 /**
  * Namespace for hac functions
@@ -116,4 +116,20 @@ $(document).ready(function(){
 	});
 	hac.getData();
 	
+	/*
+	 * Sliding pages function
+	 */
+	$('div.ui-page').live("swipeleft", function(){
+		var nextpage = $(this).next('div[data-role="page"]');
+		if (nextpage.length > 0) {
+		$.mobile.changePage(nextpage, {transition: "slide"}, false, true);
+		}
+		});
+	$('div.ui-page').live("swiperight", function(){
+		var prevpage = $(this).prev('div[data-role="page"]');
+		if (prevpage.length > 0) {
+		$.mobile.changePage(prevpage, {transition: "slide",
+		reverse: true}, true, true);
+		}
+		});	
 });
