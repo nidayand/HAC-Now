@@ -35,7 +35,8 @@ namespace sonos_hacsvc {
 		return array(
 				array("key"=>"now_playing_txt", "value"=>"Nu spelas", "mandatory"=>1,"description"=>"Title text before song/channel title"),
 				array("key"=>"by_txt", "value"=>"By", "mandatory"=>1,"description"=>"From artist text"),
-				array("key"=>"from_album_txt", "value"=>"from the album", "mandatory"=>1,"description"=>"From the album text")
+				array("key"=>"from_album_txt", "value"=>"from the album", "mandatory"=>1,"description"=>"From the album text"),
+				array("key"=>"next_song_txt", "value"=>"Next song", "mandatory"=>1,"description"=>"Next song text")
 		);
 	}
 	function setup_data(){
@@ -143,24 +144,27 @@ namespace sonos_hacsvc {
 			if (data.radioOn){
 				switch (data.status){
 					case 1: 
-						html+='<a id="sonos_back" href="#" data-role="button" class="ui-disabled">Reverse</a> <a id="sonos_stop" href="#" data-role="button">Stop</a> <a id="sonos_forward" href="#" data-role="button" class="ui-disabled">Forward</a>';
+						html+='<a id="sonos_back" href="#" data-role="button" class="ui-disabled">Previous</a> <a id="sonos_stop" href="#" data-role="button">Stop</a> <a id="sonos_forward" href="#" data-role="button" class="ui-disabled">Next</a>';
 						break;
 				}
 				 
 			} else {
 				switch (data.status){
 					case 1: 
-						html+='<a id="sonos_back" href="#" data-role="button"'+(button_rw ? '':' class="ui-disabled"')+'>Reverse</a> <a id="sonos_pause" href="#" data-role="button">Pause</a> <a id="sonos_stop" href="#" data-role="button">Stop</a> <a id="sonos_forward" href="#" data-role="button"'+(button_fw ? '':' class="ui-disabled"')+'>Forward</a>';
+						html+='<a id="sonos_back" href="#" data-role="button"'+(button_rw ? '':' class="ui-disabled"')+'>Previous</a> <a id="sonos_pause" href="#" data-role="button">Pause</a> <a id="sonos_stop" href="#" data-role="button">Stop</a> <a id="sonos_forward" href="#" data-role="button"'+(button_fw ? '':' class="ui-disabled"')+'>Next</a>';
 						break;
 					case 2: 
-						html+='<a id="sonos_back" href="#" data-role="button"'+(button_rw ? '':' class="ui-disabled"')+'>Reverse</a> <a id="sonos_play" href="#" data-role="button">Play</a> <a id="sonos_stop" href="#" data-role="button">Stop</a> <a id="sonos_forward" href="#" data-role="button"'+(button_fw ? '':' class="ui-disabled"')+'>Forward</a>';
+						html+='<a id="sonos_back" href="#" data-role="button"'+(button_rw ? '':' class="ui-disabled"')+'>Previous</a> <a id="sonos_play" href="#" data-role="button">Play</a> <a id="sonos_stop" href="#" data-role="button">Stop</a> <a id="sonos_forward" href="#" data-role="button"'+(button_fw ? '':' class="ui-disabled"')+'>Next</a>';
 						break;
 				}			
-			}
-			
-			//<a id="sonos_back" href="#" data-role="button">Reverse</a> <a id="sonos_pause" href="#" data-role="button">Pause</a> <a id="sonos_stop" href="#" data-role="button">Stop</a> <a id="sonos_play" href="#" data-role="button">Play</a> <a id="sonos_forward" href="#" data-role="button">Forward</a> 
+			} 
 			
 			html+='</div><div align="left"><a id="sonos_mute" href="#" data-role="button" data-inline="true">'+(button_muteOn ? "Unmute": "Mute")+'</a><input type="range" name="sonos_slider" id="sonos_slider" value="'+data.volume+'" min="0" max="100" step="1" '+(button_muteOn ? ' class="ui-disabled"':'')+' data-highlight="true" /></div></div>';
+			
+			//Add next song information
+			if (!data.radioOn && button_fw){
+				html+="<div align='center'>"+ui.next_song_txt+": <strong>"+data.songs.next.title+"</strong> "+ui.by_txt+' '+data.songs.artist+' '+ui.from_album_txt+' '+data.songs.album+"</div>";
+			}
 			
 			//Update the widget
 			widget.infobox("option",{
