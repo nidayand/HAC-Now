@@ -79,6 +79,20 @@ var js = {
 
 
 $(document).ready(function(){
+	//Set data load interval
+	var url = '../HAC%20Server/getkvp.php?key=data_load';
+	$.getJSON(url, function(data){
+		var timer_load = setInterval(hac.getData,data*1000);
+	});
+	//Set data update interval
+	var url = '../HAC%20Server/getkvp.php?key=data_update';
+	$.getJSON(url, function(data){
+		if (data>0){
+			var timer_update = setInterval(function(){
+				$.getJSON('../HAC%20Server/cron.php');
+			}, data*1000);			
+		}
+	});
 	hac.getData();
-	var timer = setInterval(hac.getData,10000);
+	
 });
