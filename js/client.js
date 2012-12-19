@@ -1,11 +1,14 @@
-
+/*
+ * Global configuration
+ */
+var serverBaseURL = "http://localhost/HAC%20Server/";
 
 /**
  * Namespace for hac functions
  */
 var hac = {
 		getData: function (svc, loaddata){
-			var url = '../HAC%20Server/data.php';
+			var url = serverBaseURL+'data.php';
 			if (typeof svc !== "undefined")
 				url +="?service="+svc;
 			if (typeof loaddata !== "undefined" && loaddata)
@@ -80,16 +83,16 @@ var js = {
 
 $(document).ready(function(){
 	//Set data load interval
-	var url = '../HAC%20Server/getkvp.php?key=data_load';
+	var url = serverBaseURL+'getkvp.php?key=data_load';
 	$.getJSON(url, function(data){
 		var timer_load = setInterval(hac.getData,data*1000);
 	});
 	//Set data update interval
-	var url = '../HAC%20Server/getkvp.php?key=data_update';
+	var url = serverBaseURL+'getkvp.php?key=data_update';
 	$.getJSON(url, function(data){
 		if (data>0){
 			var timer_update = setInterval(function(){
-				$.getJSON('../HAC%20Server/cron.php');
+				$.getJSON(serverBaseURL+'cron.php');
 			}, data*1000);			
 		}
 	});
