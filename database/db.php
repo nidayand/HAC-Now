@@ -82,7 +82,7 @@
 	function dbDelete($sql,$params=array(), $db=null){
 		return dbInsert($sql,$params,$db);
 	}
-	function kvp_set($key, $value, $context=null){
+	function kvp_set($key, $value, $type="data", $context=null){
 		global $db_defaultdb;
 		if ($context==null){
 			//Check from PHP url params if http://10.0.1.13:8084/_server/cron_stub.php?svc=calendar_svc has been called
@@ -99,7 +99,7 @@
 			else
 				dbUpdate("update `".$db_defaultdb."`.`kvp` set `value`=?, updated=CURRENT_TIMESTAMP where `context`=? and `key`=?", array($value,$context,$key));
 		else
-			dbInsert("INSERT INTO `".$db_defaultdb."`.`kvp` (`context`,`key`, `value`) VALUES (?,?,?)", array($context, $key, $value));		
+			dbInsert("INSERT INTO `".$db_defaultdb."`.`kvp` (`context`,`key`, `value`, `type`) VALUES (?,?,?,?)", array($context, $key, $value, $type));		
 	}
 	function kvp_get($key, $context=null){
 		global $db_defaultdb;
@@ -138,7 +138,7 @@
 	*/
 	function getData($svc){
 		global $db_defaultdb;
-		$items = dbSelect("SELECT iddata, data FROM `".$db_defaultdb."`.`infobox_data` where type=?", array($svc));
+		$items = dbSelect("SELECT iddata, data FROM `".$db_defaultdb."`.`infobox_data` where context=?", array($svc));
 		if (dbIsNotEmpty($items)){
 			return json_decode(dbGetColumnValueFromRow1($items, 'data'), true);
 		} else {
@@ -151,7 +151,7 @@
 	*/
 	function deleteData($svc){
 		global $db_defaultdb;
-		return dbDelete("update `".$db_defaultdb."`.`infobox_data` set `state`=0, `data`='{}' where type=?", array($svc));
+		return dbDelete("update `".$db_defaultdb."`.`infobox_data` set `state`=0, `data`='{}' where context=?", array($svc));
 	}
 	
 	/**
@@ -166,7 +166,7 @@
 		 * Compare the data with the existing (if available) and if changed
 		* the data is to be updated and the timestamp should also be updated. Else skip
 		*/
-		$items = dbSelect("SELECT iddata, data FROM `".$db_defaultdb."`.`infobox_data` where type=?", array($svc));
+		$items = dbSelect("SELECT iddata, data FROM `".$db_defaultdb."`.`infobox_data` where context=?", array($svc));
 		if (dbIsNotEmpty($items)){
 			//Check if update
 			$table_data = dbGetColumnValueFromRow1($items, "data");
@@ -179,7 +179,7 @@
 		
 		} else {
 			//Do insert
-			dbInsert("INSERT INTO `".$db_defaultdb."`.`infobox_data` (`type`, `data`) VALUES (?,?)", array($svc, $ui_data));
+			dbInsert("INSERT INTO `".$db_defaultdb."`.`infobox_data` (`context`, `data`) VALUES (?,?)", array($svc, $ui_data));
 			return 2;
 		}		
 	}

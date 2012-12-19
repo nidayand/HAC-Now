@@ -26,4 +26,15 @@ function debug($text,$head=false) {
 	echo $text."\n";
 }
 
+function selfPath() {
+	$s = empty($_SERVER["HTTPS"]) ? ''
+			: ($_SERVER["HTTPS"] == "on") ? "s"
+					: "";
+	
+	$proto = "http".$s;
+	$port = ($_SERVER["SERVER_PORT"] == "80") ? ""
+			: (":".$_SERVER["SERVER_PORT"]);
+	return $proto."://".$_SERVER['SERVER_NAME'].$port.substr($_SERVER['REQUEST_URI'],0,strrpos($_SERVER['REQUEST_URI'],"/")+1);
+	//return $protocol."://localhost".$port.substr($_SERVER['REQUEST_URI'],0,strrpos($_SERVER['REQUEST_URI'],"/")+1);
+}
 ?>

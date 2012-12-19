@@ -80,5 +80,24 @@ namespace temp_warning_hacsvc {
 			return array("limit"=>$limit, "entries"=>$json);
 		}
 	}
+	const javascript = <<<EOT
+	this.content = function (widget, ui, data){
+		var html = '<table width="100%" border="0"><tbody>';
+		for (var i=0; i<data.entries.length; i++){
+			var rowStr = '<tr><td>@</td><td>@&deg;</td></tr>';
+			html += js.stringChrParams(rowStr, "@", [data.entries[i].name, (Math.round(data.entries[i].temperature*10)/10)]);
+		}
+	
+		html += '<tr><td> </td></tr></tbody></table>';
+		
+		//Update the widget
+		widget.infobox("option",{
+			"priority" : 2,
+			"content" : html,
+			"headline" : ui.title_txt,
+			"subheadline" : ui.subtitle_txt
+		});	
+	}
+EOT;
 }
 ?>
