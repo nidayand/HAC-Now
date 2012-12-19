@@ -1,9 +1,24 @@
 <?php
-include_once 'config/config.php';
 include_once 'database/db.php';
+include_once 'config/config.php';
+include_once 'includes/functions.php';
+include_once 'includes/services.php';
 
 //Check the scope
 $svcs = isset($_GET["service"]) ? $_GET["service"] : "all";
+$loaddata = isset($_GET["loaddata"]) ? true : false;
+
+//If loaddata is set, the first load data for the service (as in cron.php)
+if ($loaddata){
+	//Mute debug from dataload
+	define("DEBUG_MUTED", true);
+	
+	//Include the service
+	include_once $svc_dir.$svcs.".php";
+	
+	//Call the service
+	callSvc($svcs);
+}
 
 if ($svcs == "all"){
 	$sql="SELECT * FROM `".$db_defaultdb."`.`infobox_data`";

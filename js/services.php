@@ -42,6 +42,6 @@ for ($i=0; $i<sizeof($res); $i++) {
 	if (!($isValid($res[$i],".php") || $isValid($res[$i],".js")))
 		continue;
 	//Include file
-	include_once $root."js/includes/".$res[$i];
+	include $root."js/includes/".$res[$i];
 }
 ?>

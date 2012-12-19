@@ -155,6 +155,10 @@ namespace klart_hacsvc {
 	}
 EOT;
 	
+	/** Custom method that downloads the images locally to avoid cross-ref issues
+	 * @param unknown $name
+	 * @return string
+	 */
 	function download_image($name){
 		$imageTargetBase = "services/".__NAMESPACE__."/images/";
 		$imagePathBase = \selfPath().$imageTargetBase;
