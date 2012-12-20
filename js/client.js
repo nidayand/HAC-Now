@@ -2,6 +2,7 @@
  * Global configuration
  */
 var serverBaseURL = "http://10.0.1.23/HAC%20Server/";
+var serviceFunctionCallURL = serverBaseURL+'serviceFunctionCall.php';
 
 /**
  * Namespace for hac functions
@@ -119,17 +120,29 @@ $(document).ready(function(){
 	/*
 	 * Sliding pages function
 	 */
-	$('div.ui-page').live("swipeleft", function(){
-		var nextpage = $(this).next('div[data-role="page"]');
-		if (nextpage.length > 0) {
-		$.mobile.changePage(nextpage, {transition: "slide"}, false, true);
-		}
-		});
-	$('div.ui-page').live("swiperight", function(){
-		var prevpage = $(this).prev('div[data-role="page"]');
-		if (prevpage.length > 0) {
-		$.mobile.changePage(prevpage, {transition: "slide",
-		reverse: true}, true, true);
-		}
-		});	
+	$("#homepage").on("click", function(event){
+		var percent = ($(document).width()-event.pageX)/$(document).width()*100;
+		if (percent<10)
+			$.mobile.changePage($("#application"), {transition: "slide"}, false, true);
+	});
+	$("#application").on("click", function(event){
+		var percent = event.pageX/$(document).width()*100;
+		if (percent<10)
+			$.mobile.changePage($("#homepage"), {transition: "slide", reverse: true}, false, true);
+	});
+
+	/*
+	 * Return to homepage if the user is idle
+	 */
+	idleTimer = null;
+	idleWait = 60000;
+    $('*').bind('mousemove keydown scroll', function () {
+    	clearTimeout(idleTimer);
+       idleTimer = setTimeout(function () {
+
+    	   //Goto homepage
+    	   $.mobile.changePage($("#homepage"));
+    	   
+       	}, idleWait);
+    });
 });
