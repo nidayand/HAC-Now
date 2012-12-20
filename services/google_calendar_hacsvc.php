@@ -31,8 +31,10 @@ namespace google_calendar_hacsvc {
 	 */
 	function setup_ui(){
 		return array(
-				array("key"=>"title_txt", "value"=>"Temperaturvarning", "mandatory"=>1,"description"=>"Title text"),
-				array("key"=>"subtitle_txt", "value"=>"Raise the temperature", "mandatory"=>1,"description"=>"Subtitle text")
+				array("key"=>"today", "value"=>"idag", "mandatory"=>1,"description"=>"Today text"),
+				array("key"=>"tomorrow", "value"=>"i morgon", "mandatory"=>1,"description"=>"Tomorrow text"),
+				array("key"=>"curr_date", "value"=>"Dagens datum", "mandatory"=>1,"description"=>"Todays date text"),
+				array("key"=>"curr_date_format", "value"=>"dddd, mmmm d", "mandatory"=>1,"description"=>"Dateformat of current date output")
 		);
 	}
 	function setup_data(){
@@ -197,12 +199,12 @@ namespace google_calendar_hacsvc {
 			var subject = data[i].title;
 			var calendar = data[i].calendarName;
 			if (start<tomorrow){
-				var temptitle = "@ (@)<br />idag@";
+				var temptitle = "@ (@)<br />"+ui.today+"@";
 				temptitle = js.stringChrParams(temptitle, "@", [subject,calendar, this.formatTime(true, dayevent, start)]);
 				title.push(temptitle);
 				priority = 2;
 			} else if (start<dayafterTomorrow){
-				var temptitle = "@ (@)<br />i morgon@";
+				var temptitle = "@ (@)<br />"+ui.tomorrow+"@";
 				temptitle = js.stringChrParams(temptitle, "@", [subject,calendar, this.formatTime(true, dayevent, start)]);
 				title.push(temptitle);
 				priority = priority > 0 ? priority : 1;
@@ -232,7 +234,7 @@ namespace google_calendar_hacsvc {
 		
 		//Add current date information in the footer
 		var today = new Date();
-		output+="<div align='center'>Dagens datum: <strong>"+dateFormat(today, "dddd, mmmm d")+"</strong></div>";
+		output+="<div align='center'>"+ui.curr_date+": <strong>"+dateFormat(today, ui.curr_date_format)+"</strong></div>";
 		
 		//Update the widget
 		widget.infobox("option",{
