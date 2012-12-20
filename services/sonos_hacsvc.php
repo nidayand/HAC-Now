@@ -17,7 +17,7 @@ namespace sonos_hacsvc {
 		return \kvp_get($key,__NAMESPACE__);
 	}
 	function kvp_set($key, $value){
-		\kvp_set($key, $value, __NAMESPACE__);
+		\kvp_set($key, $value, "data", __NAMESPACE__);
 	}
 	function getData(){
 		return \getData(__NAMESPACE__);
