@@ -66,7 +66,7 @@ namespace google_calendar_hacsvc {
 		$now = time();
 		$last_updated = $setup_data["infobox_updated"];
 		if (($now - $last_updated)<$setup_data["update_interval"]){
-			debug("Last update is not higher than the current update_interval key. Will not pull for data...");
+			debug("Last update is not higher than the current update_interval key (".($now - $last_updated)." secs < ".$setup_data["update_interval"]."). Will not pull for data...");
 			return false;	
 		}
 		
