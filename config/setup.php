@@ -10,11 +10,14 @@ $allSvc = includeSvcObjects();
 /*
  Check if information has been posted
 */
-//var_dump($_POST);
 $msg="";
 if (sizeof($_POST)>0){
 	$svc = $_POST["svc"];
 	$type = $_POST["type"];
+	//Check if type = "data" && svc != null
+	if ($svc!="null" && $type=="data" && !isset($_POST["_enabled"]))
+		kvp_set("_enabled", "false", $type, $svc);
+	
 	foreach ($_POST as $key => $value) {
 		if ($key=="svc" || $key=="type")
 			continue;
@@ -244,9 +247,12 @@ if (sizeof($setup)>0){
 		}
 			else echo "No UI parameters to setup for this service";
 		if (sizeof($setup)>0){
+			$enabled = kvp_get("_enabled", $allSvc[$i]);
+			
+			echo $enabled;
 			?>
 				<h4>Data settings</h4>
-				<form method="POST"><input type="hidden" name="type" value="data"/><input type="hidden" name="svc" value="<?=$allSvc[$i]?>"/><table>
+				<form method="POST"><input type="hidden" name="type" value="data"/><input type="hidden" name="svc" value="<?=$allSvc[$i]?>"/><table><tr><td>Service enabled</td><td> <input type="checkbox" name="_enabled" value="true" <?=($enabled==="true" ? "checked" : "") ?>></td></tr>
 				<?
 					for($j=0; $j<sizeof($setup); $j++){
 						$value = kvp_get($setup[$j]["key"], $allSvc[$i]) !== false ? kvp_get($setup[$j]["key"], $allSvc[$i]) : $setup[$j]["value"];
