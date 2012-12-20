@@ -83,6 +83,14 @@
 					for(var i=0; i<this.options.buttons.length; i++){
 						this.buttons[i] = $("<a href='index.html' data-role='button'>"+this.options.buttons[i].text+"</a>")
 							.appendTo(this.buttongroup).button();
+						//Add function
+						if (this.options.buttons[i].exec){
+							var clickFunction = this.options.buttons[i].exec;
+							this.buttons[i].click(function(event){
+								clickFunction();
+								event.preventDefault();
+							});
+						}						
 					}
 					this.buttongroup.controlgroup("refresh");
 				}
