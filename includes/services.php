@@ -111,7 +111,7 @@ function callSvc($svc){
 function callLoadData($svc){
 	global $db_defaultdb;
 	/*
-	 * Get the configuration parameters.
+	 * Get the configuration parameters as well as infobox data (updated, data)
 	* To be passed into the load_data function of the service
 	*/
 	$items = dbSelect("select `key`, `value` from `".$db_defaultdb."`.`kvp` where `type`=? and `context`=?", array("data",$svc));
@@ -121,11 +121,22 @@ function callLoadData($svc){
 			$setup[$items[$i]["key"]] = $items[$i]["value"];
 		}
 	}
-
+	$items = dbSelect("select `updated`, `data` from `".$db_defaultdb."`.`infobox_data` where `context`=?", array($svc));
+	if (dbIsNotEmpty($items)){
+		for ($i = 0; $i < count($items); $i++) {
+			$setup["infobox_updated"] = strtotime($items[$i]["updated"]); //Convert to PHP date
+			$setup["infobox_data"] = $items[$i]["data"];
+		}
+	}
 	/*
 	 * Call the load_data method
 	*/
 	$methodCall = $svc."\load_data";
 	return $methodCall($setup);
+}
+
+function updateTimestamp($svc){
+	global $db_defaultdb;
+	dbUpdate("update `".$db_defaultdb."`.`infobox_data` set updated=CURRENT_TIMESTAMP where `context`=?", array($svc));
 }
 ?>

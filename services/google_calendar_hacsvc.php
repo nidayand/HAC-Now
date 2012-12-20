@@ -46,7 +46,8 @@ namespace google_calendar_hacsvc {
 				array("key"=>"verification_url", "value"=>null, "mandatory"=>2,"description"=>"See description for user_code"),
 				array("key"=>"ignore_calendars", "value"=>null, "mandatory"=>1,"description"=>"Calendars to be ignored in the import. JSON format: [\"Svenska helgdagar\", \"Call log\", \"Week Numbers\"]"),
 				array("key"=>"timezone", "value"=>"Europe/Stockholm", "mandatory"=>1,"description"=>"Local timezone"),
-				array("key"=>"days", "value"=>"5", "mandatory"=>1,"description"=>"Days of data to retrive")
+				array("key"=>"days", "value"=>"5", "mandatory"=>1,"description"=>"Days of data to retrive"),
+				array("key"=>"update_interval", "value"=>"3600", "mandatory"=>1,"description"=>"How often should data be pulled from Google. In seconds")
 		);
 	}
 
@@ -58,6 +59,17 @@ namespace google_calendar_hacsvc {
 	 * json = a dataformat that is understandable by the client
 	 */
 	function load_data($setup_data){
+		/*
+		 * Check if a pull of data is requested. Get the last update timestamp
+		 * from infobox_data and check if it is outside update interval
+		 */
+		$now = time();
+		$last_updated = $setup_data["infobox_updated"];
+		if (($now - $last_updated)<$setup_data["update_interval"]){
+			debug("Last update is not higher than the current update_interval key. Will not pull for data...");
+			return false;	
+		}
+		
 		//Settings
 		$ignore_calendars = json_decode($setup_data["ignore_calendars"], true); //Names of calendars to skip
 		$timezone = $setup_data["timezone"];
@@ -173,6 +185,12 @@ namespace google_calendar_hacsvc {
 		}	
 		/* Sort the array */
 		usort($events, "google_calendar_hacsvc\sortevents");
+		
+		/*
+		 * Updating the check timestamp
+		 * (it can be that it is not updated if the content is the same)
+		 */
+		\updateTimestamp(__NAMESPACE__);
 
 		return $events;
 	}
