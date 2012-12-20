@@ -32,7 +32,22 @@
  
             // called when created, and later when changing options
             _refresh: function() {
-            	this.headline.html(this.options.headline);
+            	this.headline.remove();
+            	if (typeof this.options.headline == "object"){
+            		var headline="";
+            		for(var i=0;i<this.options.headline.length; i++){
+            			if (i==0)
+            				headline +="<p class='title'>"+this.options.headline[i]+"</p>";
+            			else
+            				headline +="<p class='title2'>"+this.options.headline[i]+"</p>";
+            			if (i<(this.options.headline.length-1))
+            				headline +="<p class='subtitle'></p>";
+            		}
+            		this.headline= $(headline);
+            	} else {
+    				this.headline = $( "<p class='title'>"+this.options.headline+"</p>");
+            	}
+            	this.headline.prependTo(this.element);
             	
 				//Check if subtitle should be shown
 				if (this.options.subheadline != null){
@@ -40,7 +55,7 @@
 						this.subheadline = $( "<p>", {
 							text: this.options.subheadline,
 							"class" : "subtitle"
-						}).insertAfter(this.headline);
+						}).insertAfter(this.headline[0]);
 					else
 						this.subheadline.html(this.options.subheadline);
 				} else 
@@ -49,7 +64,7 @@
 							this.subheadline = $( "<p>", {
 								text: "",
 								"class" : "subtitle"
-							}).insertAfter(this.headline);				
+							}).insertAfter(this.headline[0]);				
 					} else
 						this.subheadline.remove();
 					
