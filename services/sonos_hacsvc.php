@@ -163,7 +163,7 @@ namespace sonos_hacsvc {
 			
 			//Add next song information
 			if (!data.radioOn && button_fw){
-				html+="<div align='center'>"+ui.next_song_txt+": <strong>"+data.songs.next.title+"</strong> "+ui.by_txt+' '+data.songs.artist+' '+ui.from_album_txt+' '+data.songs.album+"</div>";
+				html+="<div align='center'>"+ui.next_song_txt+": <strong>"+data.songs.next.title+"</strong> "+ui.by_txt+' '+data.songs.next.artist+"</div>";
 			}
 			
 			//Update the widget
