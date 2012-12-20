@@ -38,8 +38,9 @@ include_once 'includes/services.php';
 	/* Call the load_data function to
 	 * make sure that if the method effects the data, the
 	 * content is updated
+	 * Skip interval check in the request
 	 */ 
-	callSvc($svc);
+	callSvc($svc, true);
 	
 	//Return the response from the method call
 	echo json_encode($methodResp);

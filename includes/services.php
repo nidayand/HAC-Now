@@ -54,8 +54,9 @@ function validateSvc($svc){
 /**
  * Calls a specific service
  * @param String $svc Namespace of the service
+ * @param String $skipIntervalCheck Will override any interval restrictions defined in setup
  */
-function callSvc($svc){
+function callSvc($svc, $skipIntervalCheck=false){
 	global $db_defaultdb;
 	debug($svc, true);
 	
@@ -71,7 +72,7 @@ function callSvc($svc){
 	/*
 	 * Call the load_data method in the service
 	 */
-	$load_data = callLoadData($svc);
+	$load_data = callLoadData($svc, $skipIntervalCheck);
 
 	/* If false, do not continue and if null reset row data
 	 *
@@ -106,9 +107,10 @@ function callSvc($svc){
 /**
  * Calls the load_data function of a specific namespace and returns the data
  * @param String $svc Namespace of service
+ * @param String $skipIntervalCheck Will override any interval restrictions defined in setup
  * @return boolean|array False if a retrieval failed or if service data should be removed. Otherwise it returns an array of the dataset
  */
-function callLoadData($svc){
+function callLoadData($svc, $skipIntervalCheck=false){
 	global $db_defaultdb;
 	/*
 	 * Get the configuration parameters as well as infobox data (updated, data)
@@ -128,11 +130,33 @@ function callLoadData($svc){
 			$setup["infobox_data"] = $items[$i]["data"];
 		}
 	}
+	
+	/*
+	 * Check if the service has a pull limit defined
+	* in the settings if it should be checked
+	*/
+	$pullInterval = kvp_get("_pull_interval", $svc);
+	$pullInterval = ($pullInterval==false? 0: $pullInterval);
+	
+	if (!$skipIntervalCheck && isset($setup["infobox_updated"]) && $pullInterval>0){
+		$now = time();
+		$last_updated = $setup["infobox_updated"];
+		if (($now - $last_updated)<$pullInterval){
+			debug("Last update is not higher than the current Pull Interval key (".($now - $last_updated)." secs < ".$pullInterval."). Will not pull for data...");
+			return false;
+		}
+	}	
 	/*
 	 * Call the load_data method
 	*/
 	$methodCall = $svc."\load_data";
-	return $methodCall($setup);
+	$response = $methodCall($setup);
+	
+	//Update timestamp if a proper result
+	if ($response !== false && $response !==null){
+		updateTimestamp($svc);
+	}
+	return $response;
 }
 
 function updateTimestamp($svc){
