@@ -248,11 +248,13 @@ if (sizeof($setup)>0){
 			else echo "No UI parameters to setup for this service";
 		if (sizeof($setup)>0){
 			$enabled = kvp_get("_enabled", $allSvc[$i]);
-			
-			echo $enabled;
+			$pullInterval = kvp_get("_pull_interval", $allSvc[$i]);
 			?>
 				<h4>Data settings</h4>
-				<form method="POST"><input type="hidden" name="type" value="data"/><input type="hidden" name="svc" value="<?=$allSvc[$i]?>"/><table><tr><td>Service enabled</td><td> <input type="checkbox" name="_enabled" value="true" <?=($enabled==="true" ? "checked" : "") ?>></td></tr>
+				<form method="POST"><input type="hidden" name="type" value="data"/><input type="hidden" name="svc" value="<?=$allSvc[$i]?>"/>
+				<table>
+					<tr><td>Service enabled</td><td> <input type="checkbox" name="_enabled" value="true" <?=($enabled==="true" ? "checked" : "") ?>></td><td>Enable/disable the service for calling the data_load function of the service</td></tr>
+					<tr><td>Pull interval</td><td> <input type="text" name="_pull_interval" value="<?=$pullInterval==false ? 0: $pullInterval?>"></td><td>The minimum interval in seconds where another request of data can be perfomed. Used to limit unnecessary loading of data from the called external service.<br/>Optional parameter. Set to 0 to disable</td></tr>
 				<?
 					for($j=0; $j<sizeof($setup); $j++){
 						$value = kvp_get($setup[$j]["key"], $allSvc[$i]) !== false ? kvp_get($setup[$j]["key"], $allSvc[$i]) : $setup[$j]["value"];
