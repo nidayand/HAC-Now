@@ -117,7 +117,7 @@ namespace sonos_hacsvc {
 			var html="";
 			
 			//Add button actions
-			var url = '../HAC%20Server/serviceFunctionCall.php';
+			var url = serviceFunctionCallURL;
 			var service = 'sonos_hacsvc';
 			
 			//Disable forward/reverse buttons if radio is on
