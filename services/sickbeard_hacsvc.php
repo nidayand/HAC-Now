@@ -16,7 +16,7 @@ namespace sickbeard_hacsvc {
 		return \kvp_get($key,__NAMESPACE__);
 	}
 	function kvp_set($key, $value){
-		\kvp_set($key, $value, __NAMESPACE__);
+		\kvp_set($key, $value, "data", __NAMESPACE__);
 	}
 	function getData(){
 		return \getData(__NAMESPACE__);
@@ -54,27 +54,128 @@ namespace sickbeard_hacsvc {
 	 * json = a dataformat that is understandable by the client
 	 */
 	function load_data($setup_data){
+		$tvdb_prepend = "http://www.thetvdb.com/banners/_cache/";
+		$imageTargetBase = "services/".__NAMESPACE__."/banners/";
+		$imagePathBase = \selfPath().$imageTargetBase;
+			
+		//Check if there is any old data entries that needs to be prepended
+		$resp = getData();
+			
+		//Set TVDB API key (override setting in TVDB.php)
+		define('PHPTVDB_API_KEY', $setup_data["tvdbapi"]);
+		
+		//Get data
+		$data = @file_get_contents("http://".$setup_data["host"]."/api/".$setup_data["api"]."/?cmd=history&limit=10&type=downloaded");
+		if (!$data)
+			return false;
+		$data = json_decode($data, true);
+			
+		//Get previous check time
+		$checked = kvp_get("checkedTime");
+			
+		//Iterate through downloads
+		$tvdbshows = array();
+		$latestDate = null;
+		for ($i=0; $i<sizeof($data["data"]); $i++){
+			$date = strtotime($data["data"][$i]["date"]); //Convert to int
+			$episode = $data["data"][$i]["episode"];
+			$season = $data["data"][$i]["season"];
+			$showName = $data["data"][$i]["show_name"];
+			$tvdbid = $data["data"][$i]["tvdbid"];
+		
+			//Skip if entry has been retrieved previously
+			if ($checked && $date<=$checked)
+				continue;
+		
+			//Look for TVDB information
+			if (isset($tvdbshows[$tvdbid]))
+				$show = $tvdbshows[$tvdbid];
+			else {
+				$show = @\TV_Shows::findById($tvdbid);
+				$tvdbshows[$tvdbid] = $show;
+			}
+		
+			if($show){
+				$episodeInfo=$show->getEpisode($season, $episode);
+			}
+		
+			//Download banner image
+			$imageFile = $tvdbid.".jpg";
+			$imageTarget = $imageTargetBase.$imageFile;
+		
+			if(!file_exists($imageTarget)){
+				$image = file_get_contents($tvdb_prepend.$show->banner);
+				file_put_contents($imageTarget, $image);
+			}
+		
+			array_push($resp, array("episode"=>$episode, "season"=>$season, "show"=>$showName, "banner"=>$imagePathBase.$imageFile, "title"=>$episodeInfo->name, "overview"=>$episodeInfo->overview, "date"=>$date));
+		}
+		//Get the latest time of entries
+		if (isset($data["data"][0]["date"])){
+			$latestDate=strtotime($data["data"][0]["date"]);
+			kvp_set("checkedTime", $latestDate);
+		}
+			
+		//Sort the data based on date, in descending order
+		usort($resp, "sickbeard_hacsvc\sortentries");
+			
+		//Delete if the array is empty else return it
+		if (sizeof($resp)===0)
+			return null;
+		else {
 
+			//Return the array
+			return $resp;
+		}
 	}
 	const javascript = <<<EOT
 	this.content = function (widget, ui, data){
-		var html = '<table width="100%" border="0" class="boxtext"> <tr> <td colspan="2" width="50%"><center><img src="?" width="76" height="76" /><table class="boxtext"><tr><td>'+ui.humidity+': ?%</td></tr><tr><td>'+ui.wind+': ?</td></tr></table></center></td> <td colspan="2" class="boxtextlarge"><strong>?&deg;</strong></td> </tr> <tr> <td align="center" class=""> <table > <tr align="center"><td>?</td></tr> <tr align="center"><td><img src="?" width="51" height="51" /></td></tr> <tr align="center"><td><strong>?&deg;</strong> / ?&deg;</td></tr> <tr align="center"><td>?mm</td></tr> </table> </td> <td align="center" class="tableleftsolid"> <table > <tr align="center"><td>?</td></tr> <tr align="center"><td><img src="?" width="51" height="51" /></td></tr> <tr align="center"><td><strong>?&deg;</strong> / ?&deg;</td></tr> <tr align="center"><td>?mm</td></tr> </table> </td> <td align="center" class="tableleftsolid"> <table > <tr align="center"><td>?</td></tr> <tr align="center"><td><img src="?" width="51" height="51" /></td></tr> <tr align="center"><td><strong>?&deg;</strong> / ?&deg;</td></tr> <tr align="center"><td>?mm</td></tr> </table> </td> <td align="center" class="tableleftsolid"> <table > <tr align="center"><td>?</td></tr> <tr align="center"><td><img src="?" width="51" height="51" /></td></tr> <tr align="center"><td><strong>?&deg;</strong> / ?&deg;</td></tr> <tr align="center"><td>?mm</td></tr> </table> </td> </tr> </table>';
+		var service = 'sickbeard_hacsvc';
+						
+		var html = '<table width="100%" border="0"><tbody>';
 		
-		html = js.stringChrParams(html,'?',[data.current.icon, data.current.humidity, data.current.wind, data.current.temp]);
-		for(var i=0;i<=3;i++){
-			html = js.stringChrParams(html,'?',[dateFormat(new Date(data.forecast[i].day*1000), "ddd"),data.forecast[i].icon,data.forecast[i].high,data.forecast[i].low,data.forecast[i].rain]);
+		for (var i=0; i<data.length; i++){
+			var rowStr = '<tr><th><img alt="" src="@" style=""></th></tr><tr><td style="vertical-align: top;"><span class="boxtext"><strong>'+ui.season_txt+' @, '+ui.episode_txt+' @: @</strong></span><br><span class="boxtextnormal">@</span></td></tr>';
+			html += js.stringChrParams(rowStr, "@", [data[i].banner, data[i].season, data[i].episode, data[i].title, data[i].overview]);
 		}
+		
+		html += '<tr><td> </td></tr></tbody></table>';
 			
 		//Update the widget
 		widget.infobox("option",{
-			"priority" : 0,
+			"priority" : 1,
 			"content" : html,
-			"headline" : ui.title,
+			"headline" : ui.title_txt,
 			"subheadline" : null,
-			"contentpadding" : false
+			"contentpadding" : true,
+			"buttons" : [{text: ui.ok_txt, exec: function(){
+					$.post(serviceFunctionCallURL, { service: service, method: "dismiss" }, function(data){hac.getData(service);} );
+				}}]
 		});			
 	}
 EOT;
+	
+
+	/**
+	 * Sorts the entries in the list based on the
+	 * date information of the objects
+	 * @param entry $a
+	 * @param entry $b
+	 * @return number
+	 */
+	function sortentries($a, $b){
+		return ($b["date"] - $a["date"]);
+	}
+	/**
+	 * To be used to acknowledge the information and to clear
+	 * the information in the database
+	 * @param unknown $array
+	 * @return boolean
+	 */
+	function dismiss($array){
+		deleteData();
+		return true;
+	}
 	
 }
 
