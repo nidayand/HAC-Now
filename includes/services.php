@@ -23,6 +23,27 @@ function includeSvcObjects(){
 	}
 	return $response;
 }
+
+/**
+ * Checks if all necessary mandatory parameters have been set
+ * for the specific service
+ * @param namespace $svc
+ * @return boolean
+ */
+function validateSvc($svc){
+	//Retrieve the parameters
+	$setupCall = $svc."\setup_data";
+	$setup = $setupCall();
+	
+	//Iterate through the list and check the mandatory parameters
+	for($j=0; $j<sizeof($setup); $j++){
+		if ($setup[$j]["mandatory"]==1 && (kvp_get($setup[$j]["key"], $svc) == false)){
+			return false;
+		}
+	}
+	return true;
+}
+
 /**
  * Calls a specific service
  * @param String $svc Namespace of the service
@@ -30,7 +51,19 @@ function includeSvcObjects(){
 function callSvc($svc){
 	global $db_defaultdb;
 	debug($svc, true);
+	
+	/*
+	 * Check that all mandatory parameters have been set
+	 * for the specific service
+	 */
+	if(!validateSvc($svc)){
+		debug("Mandatory parameters have not been set for the service. Skipping data_load...");
+		return false;
+	}
 
+	/*
+	 * Call the load_data method in the service
+	 */
 	$load_data = callLoadData($svc);
 
 	/* If false, do not continue and if null reset row data
