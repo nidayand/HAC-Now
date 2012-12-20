@@ -73,7 +73,7 @@ namespace sonos_hacsvc {
 			//var_dump($positionInfo);
 			//Check if radio is playing
 			$mediaInfo = $sonos-> GetMediaInfo();
-			debug(print_r($positionInfo,true));
+			//debug(print_r($positionInfo,true));
 			
 			if (isset($mediaInfo["title"])){
 				$radioIsOn=true;
@@ -84,7 +84,7 @@ namespace sonos_hacsvc {
 				debug("Song is on");
 				//Get next song info
 				$currentPlaylist = $sonos-> GetCurrentPlaylist();
-				debug(print_r($currentPlaylist,true));
+				//debug(print_r($currentPlaylist,true));
 				
 				$next = array();
 				$prev = array();
