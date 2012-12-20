@@ -31,6 +31,13 @@ function includeSvcObjects(){
  * @return boolean
  */
 function validateSvc($svc){
+	//Check if the service is enabled
+	$enabled = kvp_get("_enabled", $svc);
+	if (!$enabled || $enabled==="false"){
+		debug("The service is not enabled");
+		return false;
+	}
+	
 	//Retrieve the parameters
 	$setupCall = $svc."\setup_data";
 	$setup = $setupCall();
