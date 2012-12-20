@@ -364,6 +364,12 @@ EOT;
 		
 	}
 	
+	/**
+	 * Performs a URL POST-request using curl to deal with SSL requests
+	 * @param string $url The url to be posted to
+	 * @param array $fields Parameters to be passed
+	 * @return number|mixed Returns the error code if failed else returns the result from the call
+	 */
 	function postGoogle($url, $fields){
 		$fields_string="";
 		foreach($fields as $key=>$value) { $fields_string .= (strlen($fields_string)==0? "":"&").$key.'='.$value; }
@@ -385,12 +391,22 @@ EOT;
 		}
 		return json_decode($result, true);
 	}
+	/**
+	 * Validates if the request response is an error code
+	 * @param unknown $request
+	 * @return integer|boolean Returns the error code if the request is a number else it returns false - i.e. it is not an error code
+	 */
 	function googleRequestError($request){
 		if (is_int($request))
 			return $request;
 		else
 			return false;
 	}
+	/**
+	 * Performs a URL GET-request using curl to deal with SSL requests
+	 * @param string $url url to be called
+	 * @return number|mixed Returns the error code if failed else returns the result from the call
+	 */
 	function getGoogle($url){
 		debug ("GET url: ".$url);
 		$fields_string="";
@@ -411,6 +427,13 @@ EOT;
 		curl_close($ch);
 		return json_decode($result, true);
 	}
+	/**
+	 * To be called if a 401 is received in a previous Google request. The method
+	 * will update the access_token based on the refresh_token that is store in 
+	 * the database
+	 * @param array $setup_data Configurationd data
+	 * @return boolean|string access_token
+	 */
 	function refreshAccessToken($setup_data){
 		$client_id = $setup_data["client_id"];
 		$client_secret =$setup_data["client_secret"];
@@ -442,6 +465,12 @@ EOT;
 		//debug("Timezone diff: ".$utcdiff_text);
 		return $utcdiff_text;
 	}	
+	/**
+	 * Sorts the calender entries based on start time
+	 * @param object $a
+	 * @param object $b
+	 * @return number Sorting result
+	 */
 	function sortevents($a, $b){
 		return ($a["start"] - $b["start"]);
 	}	
