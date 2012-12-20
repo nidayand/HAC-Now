@@ -151,7 +151,7 @@
 	*/
 	function deleteData($svc){
 		global $db_defaultdb;
-		return dbDelete("update `".$db_defaultdb."`.`infobox_data` set `state`=0, `data`='{}' where context=?", array($svc));
+		return dbDelete("update `".$db_defaultdb."`.`infobox_data` set `state`=0, updated=CURRENT_TIMESTAMP, `data`='{}' where context=?", array($svc));
 	}
 	
 	/**
