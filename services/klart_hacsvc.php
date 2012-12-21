@@ -1,6 +1,12 @@
 <?php
 /**
  * Retrieves the current weather conditions
+ * Comment:
+ * 		Customized to use my personal 1-wire data for display of current
+ * 		temperature and humidity. To only use the data from klart.se change
+ * 		the following:
+ * 		1. Remove the first rows in load_data - "Get data from 1wire"
+ * 		2. Uncomment 2 statements under "Modified to use private 1-wire data" and remove the custom
  *
  * @author se31139
  *
@@ -58,6 +64,7 @@ namespace klart_hacsvc {
 
 		//Get the data from Klart.se
 		$url = 'http://www.klart.se/api/weatherapi/get_weather/'.kvp_get("city_id").'/1/sv/2';
+		debug("POST url: ".$url);
 		$fields_string="v=2.0&i=0&android=1.0&sun=1";
 		$ch = curl_init();
 		curl_setopt($ch,CURLOPT_URL,$url);
@@ -110,9 +117,10 @@ namespace klart_hacsvc {
 		}
 			
 		$current_conditionA = array('condition'=>"",
+				//Modified to use private 1-wire data
 				//'temp'=>(String) $xml->weather->current_conditions->temp_c['data'],
-				'temp'=>$temp,
 				//'humidity'=>(String) $xml->weather->current_conditions->humidity['data'],
+				'temp'=>$temp,
 				'humidity'=>$rh,
 				'wind'=>$weatherCurr["windDirection"].", ".$weatherCurr["wind"]." m/s",
 				'icon'=>$weatherCurr["image"]);
