@@ -99,16 +99,7 @@ namespace sickbeard_hacsvc {
 				$episodeInfo=$show->getEpisode($season, $episode);
 			}
 		
-			//Download banner image
-			$imageFile = $tvdbid.".jpg";
-			$imageTarget = $imageTargetBase.$imageFile;
-		
-			if(!file_exists($imageTarget)){
-				$image = file_get_contents($tvdb_prepend.$show->banner);
-				file_put_contents($imageTarget, $image);
-			}
-		
-			array_push($resp, array("episode"=>$episode, "season"=>$season, "show"=>$showName, "banner"=>$imagePathBase.$imageFile, "title"=>$episodeInfo->name, "overview"=>$episodeInfo->overview, "date"=>$date));
+			array_push($resp, array("episode"=>$episode, "season"=>$season, "show"=>$showName, "banner"=>$tvdb_prepend.$show->banner, "title"=>$episodeInfo->name, "overview"=>$episodeInfo->overview, "date"=>$date));
 		}
 		//Get the latest time of entries
 		if (isset($data["data"][0]["date"])){
