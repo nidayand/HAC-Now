@@ -84,16 +84,7 @@ namespace couchpotato_hacsvc {
 		
 			$id = $obj["data"]["library"]["identifier"];
 		
-			//Download image
-			$imageFile = $id.".jpg";
-			$imageTarget = $imageTargetBase.$imageFile;
-		
-			if(!file_exists($imageTarget)){
-				$image = file_get_contents($image);
-				file_put_contents($imageTarget, $image);
-			}
-		
-			array_push($dList,array("title"=>$title, "plot"=>trim($plot), "banner"=>$imagePathBase.$imageFile, "added"=>$obj["added"]));
+			array_push($dList,array("title"=>$title, "plot"=>trim($plot), "banner"=>$image, "added"=>$obj["added"]));
 		}
 		debug("Current number of not acknowledged: ".sizeof($dList));
 		
@@ -157,7 +148,6 @@ EOT;
 	 * @return boolean
 	 */
 	function dismiss($array){
-		$imageTargetBase = "services/".__NAMESPACE__."/banners/";
 		deleteData();
 		return true;
 	}
