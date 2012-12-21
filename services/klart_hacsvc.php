@@ -106,7 +106,7 @@ namespace klart_hacsvc {
 			$sunUp = $dayData[10];
 			$sunDown = $dayData[11];
 
-			array_push($weatherDays, array("time"=>$time, "tempMax"=>$maxTemp, "tempMin"=>$minTemp, "wind"=>$wind, "windDirection"=>$windDirection, "image"=>download_image($image), "rain"=>$rain));
+			array_push($weatherDays, array("time"=>$time, "tempMax"=>$maxTemp, "tempMin"=>$minTemp, "wind"=>$wind, "windDirection"=>$windDirection, "image"=>getImageURL($image), "rain"=>$rain));
 		}
 			
 		$current_conditionA = array('condition'=>"",
