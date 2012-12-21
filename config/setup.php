@@ -41,7 +41,11 @@ if (sizeof($_POST)>0){
 	<script>
 	$(function() {
 		
-		$( "#accordion" ).accordion();
+		$( "#accordion" ).accordion({
+            heightStyle: "content",
+            collapsible: true,
+            active: false
+        });
 		
 
 		
