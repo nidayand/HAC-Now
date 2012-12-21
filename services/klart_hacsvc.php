@@ -85,7 +85,7 @@ namespace klart_hacsvc {
 			//Check for current conditions
 			if(strpos($weatherFull[$i], "wcc")>-1){
 				$currData = explode(";",$dayStringList[1]);
-				$weatherCurr = array("temp"=>$currData[1], "wind"=>$currData[2], "windDirection"=>$currData[3], "image"=>download_image($currData[4]), "humidity"=>$currData[6]);
+				$weatherCurr = array("temp"=>$currData[1], "wind"=>$currData[2], "windDirection"=>$currData[3], "image"=>getImageURL($currData[4]), "humidity"=>$currData[6]);
 
 			}
 			$dayData = explode(";",$dayStringList[0]);
@@ -155,21 +155,13 @@ namespace klart_hacsvc {
 	}
 EOT;
 	
-	/** Custom method that downloads the images locally to avoid cross-ref issues
+	/** Get the complete image url
 	 * @param unknown $name
 	 * @return string
 	 */
-	function download_image($name){
-		$imageTargetBase = "services/".__NAMESPACE__."/images/";
-		$imagePathBase = \selfPath().$imageTargetBase;
+	function getImageURL($name){
 		$imageFile = $name.".png";
-		$imageTarget = $imageTargetBase.$imageFile;
-	
-		if(!file_exists($imageTarget)){
-			$image = file_get_contents("http://dfqhb50p6jl8.cloudfront.net/img/icons/".$imageFile);
-			file_put_contents($imageTarget, $image);
-		}
-		return $imagePathBase.$imageFile;
+		return "http://dfqhb50p6jl8.cloudfront.net/img/icons/".$imageFile;
 	}
 }
 
