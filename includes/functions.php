@@ -37,4 +37,17 @@ function selfPath() {
 	return $proto."://".$_SERVER['SERVER_NAME'].$port.substr($_SERVER['REQUEST_URI'],0,strrpos($_SERVER['REQUEST_URI'],"/")+1);
 	//return $protocol."://localhost".$port.substr($_SERVER['REQUEST_URI'],0,strrpos($_SERVER['REQUEST_URI'],"/")+1);
 }
+
+/**
+ * Deletes a folder including all content
+ * @param string $dir Path to directory to be removed
+ * @return boolean
+ */
+function delTree($dir) {
+	$files = array_diff(scandir($dir), array('.','..'));
+	foreach ($files as $file) {
+		(is_dir("$dir/$file")) ? delTree("$dir/$file") : unlink("$dir/$file");
+	}
+	return rmdir($dir);
+}
 ?>
