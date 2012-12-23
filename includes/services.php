@@ -149,8 +149,7 @@ function callLoadData($svc, $skipIntervalCheck=false){
 	/*
 	 * Call the load_data method
 	*/
-	$methodCall = $svc."\load_data";
-	$response = $methodCall($setup);
+	$response = callMethod($svc, "load_data", $setup);
 	
 	//Update timestamp if a proper result
 	if ($response !== false && $response !==null){
@@ -162,5 +161,10 @@ function callLoadData($svc, $skipIntervalCheck=false){
 function updateTimestamp($svc){
 	global $db_defaultdb;
 	dbUpdate("update `".$db_defaultdb."`.`infobox_data` set updated=CURRENT_TIMESTAMP where `context`=?", array($svc));
+}
+
+function callMethod($svc, $method, $params){
+	$methodCall = $svc."\\".$method;
+	return $methodCall($params);	
 }
 ?>
