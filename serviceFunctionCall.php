@@ -32,8 +32,7 @@ include_once 'includes/services.php';
 	include_once $svc_dir.$svc.".php";
 	
 	//Call the method in the service
-	$methodCall= $svc."\\".$method;
-	$methodResp = $methodCall($params);
+	$methodResp = callMethod($svc, $method, $params);
 	
 	/* Call the load_data function to
 	 * make sure that if the method effects the data, the
