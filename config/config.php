@@ -14,7 +14,12 @@
 	
 	//Folders
 	$svc_dir = "services/";
+	$svcext_dir = "services/extensions/";
 	$app_dir = "applications/";
+	
+	//Files
+	$svcfileend = "_hacsvc.php";
+	$svcextfileend = "_hacsvcext.php";
 	
 	$root = $_SERVER["DOCUMENT_ROOT"].substr($_SERVER["SCRIPT_NAME"],0,strpos($_SERVER["SCRIPT_NAME"],"/",1)+1);
 	$debugOn = false;
