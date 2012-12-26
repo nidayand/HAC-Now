@@ -1,12 +1,6 @@
 <?php
 /**
- * Retrieves the current weather conditions
- * Comment:
- * 		Customized to use my personal 1-wire data for display of current
- * 		temperature and humidity. To only use the data from klart.se change
- * 		the following:
- * 		1. Remove the first rows in load_data - "Get data from 1wire"
- * 		2. Uncomment 2 statements under "Modified to use private 1-wire data" and remove the custom
+ * Retrieves the current weather conditions from klart.se
  *
  * @author se31139
  *
@@ -56,11 +50,6 @@ namespace klart_hacsvc {
 	 * json = a dataformat that is understandable by the client
 	 */
 	function load_data($setup_data){
-		//Get data from 1wire
-		$items = dbSelect('select * from (select round(`humid temp box 1 -temp`.Temperature,1) as temp FROM 1wire.`humid temp box 1 -temp` order by `index` desc limit 1) as a1,(SELECT round(RH,0) as rh FROM 1wire.`humid temp box 1` order by `index` desc limit 1) as a2');
-		$temp = dbGetColumnValueFromRow1($items,'temp');
-		$rh = dbGetColumnValueFromRow1($items,'rh');
-		debug ("Retrieved 1-wire data");
 
 		//Get the data from Klart.se
 		$url = 'http://www.klart.se/api/weatherapi/get_weather/'.kvp_get("city_id").'/1/sv/2';
@@ -115,13 +104,13 @@ namespace klart_hacsvc {
 
 			array_push($weatherDays, array("time"=>$time, "tempMax"=>$maxTemp, "tempMin"=>$minTemp, "wind"=>$wind, "windDirection"=>$windDirection, "image"=>getImageURL($image), "rain"=>$rain));
 		}
-			
+
 		$current_conditionA = array('condition'=>"",
+				'temp'=>$weatherCurr["temp"],
+				'humidity'=>$weatherCurr["humidity"],
 				//Modified to use private 1-wire data
-				//'temp'=>(String) $xml->weather->current_conditions->temp_c['data'],
-				//'humidity'=>(String) $xml->weather->current_conditions->humidity['data'],
-				'temp'=>$temp,
-				'humidity'=>$rh,
+				//'temp'=>$temp,
+				//'humidity'=>$rh,
 				'wind'=>$weatherCurr["windDirection"].", ".$weatherCurr["wind"]." m/s",
 				'icon'=>$weatherCurr["image"]);
 		$forecastA = array();
