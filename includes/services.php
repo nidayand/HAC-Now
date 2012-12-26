@@ -6,13 +6,19 @@
  */
 function includeSvcObjects(){
 	global $svc_dir;
+	global $svcext_dir;
 	global $root;
-
+	global $svcfileend;
+	global $svcextfileend;
+	
+	//Array of all service
 	$response = array();
+	
+	//Add all services
 	$res = scandir($root.$svc_dir);
 	for ($i=0; $i<sizeof($res); $i++) {
 		//Skip certain files
-		if ((strpos($res[$i],".")==0) || (strpos($res[$i],".tmpl")!=0) || (!strpos($res[$i],"_hacsvc.php")))
+		if ((strpos($res[$i],".")==0) || (strpos($res[$i],".tmpl")!=0) || (!strpos($res[$i],$svcfileend)))
 			continue;
 			
 		//Include services
@@ -21,6 +27,17 @@ function includeSvcObjects(){
 		$svc = substr($res[$i],0,strpos($res[$i],"."));
 		array_push($response, $svc);
 	}
+	
+	//Add all possible extensions
+	$res = scandir($root.$svcext_dir);
+	for ($i=0; $i<sizeof($res); $i++) {
+		//Skip certain files
+		if ((strpos($res[$i],".")==0) || (strpos($res[$i],".tmpl")!=0) || (!strpos($res[$i],$svcextfileend)))
+			continue;
+			
+		//Include services
+		include_once $root.$svcext_dir.$res[$i];	
+	}	
 	return $response;
 }
 
@@ -163,8 +180,27 @@ function updateTimestamp($svc){
 	dbUpdate("update `".$db_defaultdb."`.`infobox_data` set updated=CURRENT_TIMESTAMP where `context`=?", array($svc));
 }
 
+/**
+ * Calls the method of the service. Checks if there is an extension to the service,
+ * if so calls the service with the input from the master as the main
+ * @param string $svc
+ * @param string $method
+ * @param array $params
+ * @return array
+ */
 function callMethod($svc, $method, $params){
 	$methodCall = $svc."\\".$method;
-	return $methodCall($params);	
+	$response = $methodCall($params);
+	
+	//Check if extension exists
+	if (function_exists($svc."\\ext\\".$method)){
+		debug("Extension exists, calling method: ".$method);
+		$methodCall = $svc."\\ext\\".$method;
+		$response = $methodCall($response, $params);
+	}
+
+	return $response;
 }
+
+
 ?>
