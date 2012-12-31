@@ -189,14 +189,15 @@ function updateTimestamp($svc){
  * @return array
  */
 function callMethod($svc, $method, $params){
-	$methodCall = $svc."\\".$method;
-	$response = $methodCall($params);
-	
 	//Check if extension exists
 	if (function_exists($svc."\\ext\\".$method)){
 		debug("Extension exists, calling method: ".$method);
 		$methodCall = $svc."\\ext\\".$method;
-		$response = $methodCall($response, $params);
+		$response = $methodCall($params);
+	} else {
+		debug("Extension does not exist, calling method: ".$method);
+		$methodCall = $svc."\\".$method;
+		$response = $methodCall($params);		
 	}
 
 	return $response;
