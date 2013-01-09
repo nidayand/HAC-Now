@@ -93,6 +93,19 @@ var js = {
 				str = str.substring(0,pos)+paramsA[i]+str.substring(pos+1);
 			}
 			return str;
+		},
+		
+		showLoadingWidget: function(){
+			$.mobile.loading( 'show', {
+				text: 'loading',
+				textVisible: false,
+				theme: 'a',
+				html: ''
+			});
+		},
+		hideLoadingWidget: function(){
+			//Stop the loading widget
+        	$.mobile.loading( 'hide' );
 		}
 };
 
