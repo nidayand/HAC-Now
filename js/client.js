@@ -123,6 +123,9 @@ $(document).ready(function(){
 	var url = serverBaseURL+'getkvp.php?key=data_update';
 	$.getJSON(url, function(data){
 		if (data>0){
+			//load now
+			$.getJSON(serverBaseURL+'cron.php');
+			//set timer
 			var timer_update = setInterval(function(){
 				$.getJSON(serverBaseURL+'cron.php');
 			}, data*1000);			
