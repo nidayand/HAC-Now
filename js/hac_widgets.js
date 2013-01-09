@@ -32,6 +32,8 @@
  
             // called when created, and later when changing options
             _refresh: function() {
+            	
+            	//Fix headline
             	this.headline.remove();
             	if (typeof this.options.headline == "object"){
             		var headline="";
@@ -86,7 +88,7 @@
 				}
 				
 				//Check if buttons are to be shown
-				if (this.options.buttons!=null){
+				if (this.options.buttons!=null && typeof this.buttons == "undefined"){
 					//Add horizontal group first
 					this.buttongroup = $("<div>", {
 								"align":"center",
@@ -108,8 +110,9 @@
 						}						
 					}
 					this.buttongroup.controlgroup("refresh");
+					
 				}
-				
+							
 				this.autoUpdate();
  
             },
@@ -133,6 +136,7 @@
             // events bound via _on are removed automatically
             // revert other modifications here
             _destroy: function() {
+            	
             	//Stop autoupdate if available
             	if (this.intervalKey)
             		clearInterval(this.intervalKey);
