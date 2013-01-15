@@ -1,0 +1,34 @@
+README
+------------------------
+
+PRE_REQUISITES
+PHP needs to have enabled (in PHP.ini) the following extensions:
+- php_curl.dll
+- php_openssl.dll
+- php_pdo_mysql.dll
+- php_mysql.dll		(uncertain if needed)
+- php_mysqli.dll	(uncertain if needed)
+- php_mbstring.dll	(uncertain if needed)
+
+
+INSTALLATION
+
+1. Database
+Setup your schema definition using "HAC Server/database/db_schema.sql"
+Modify it appropriately by setting your own database name
+
+2. Setup database connection
+Open "HAC Server/config/config.php" in an editor and define your database constants
+
+3. Define services information
+	- Open "HAC Server/config/setup.php" in a browser
+	- Set the global_settings
+		If you don't use "data_update" you need to setup a seperate scheduler that will call the cron.php script
+	- Configure UI and Data settings for the services that you wish to enable
+	
+4. Set the "serverBaseURL" parameter in the client code : "HAC Client/js/client.js" to point to your server.
+	
+That's it.
+
+Call cron.php from a browser to activate the first load and you will also see if all enabled services are being
+properly loaded. 
