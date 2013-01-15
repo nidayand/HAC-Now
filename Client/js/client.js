@@ -1,7 +1,7 @@
 /*
  * Global configuration
  */
-var serverBaseURL = "http://10.0.1.23/HAC_Now/Server/";
+var serverBaseURL = "../Server/";
 var serviceFunctionCallURL = serverBaseURL+'serviceFunctionCall.php';
 
 /**
