@@ -21,7 +21,7 @@
 	$svcfileend = "_hacsvc.php";
 	$svcextfileend = "_hacsvcext.php";
 	
-	$root = $_SERVER["DOCUMENT_ROOT"].substr($_SERVER["SCRIPT_NAME"],0,strpos($_SERVER["SCRIPT_NAME"],"/",1)+1);
+	$root = $_SERVER["DOCUMENT_ROOT"].substr($_SERVER["SCRIPT_NAME"],0,strpos($_SERVER["SCRIPT_NAME"],"/",1)+1)."Server/";
 	$debugOn = false;
 
 	//Global settings (configured via setup.php)
