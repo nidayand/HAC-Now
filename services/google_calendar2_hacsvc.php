@@ -72,136 +72,121 @@ namespace google_calendar2_hacsvc {
 		 * Check if an device code exists. I.e. if the server has an ID
 		* to use a Google Account
 		* */
-		$device_code=@$setup_data["device_code"];
-		if ($device_code)
-			debug ("Device code: ".$device_code);
-		else
-			debug ("Missing device code registration. Retrieves data from Google for registration...");
-		if (!$device_code){
-			$device_code_call = \Google_Helper::getDeviceCode($setup_data["client_id"], $setup_data["scope"]);
-			if (!$device_code_call)
-				//Failed to retrieve the information. Quitting
-				return false;
+		$setup_data_new = \Google_Helper::verifyDeviceCode($setup_data);
+		if ($setup_data_new && array_diff($setup_data, $setup_data_new)){
 			//Store the information
-			kvp_set("device_code",$device_code_call["device_code"]);
-			kvp_set("user_code",$device_code_call["user_code"]);
-			kvp_set("verification_url",$device_code_call["verification_url"]);
-			
-			$setup_data["device_code"]= $device_code_call["device_code"];
+			kvp_set("device_code",$setup_data_new["device_code"]);
+			kvp_set("user_code",$setup_data_new["user_code"]);
+			kvp_set("verification_url",$setup_data_new["verification_url"]);
+				
+			$setup_data = $setup_data_new;
+		} else {
+			debug("Failed to retrieve device_code..");
+			return false;
 		}
 
 		/*
 		 * Check for access token
 		*/
-		$access_token = @$setup_data["access_token"];
-		if (!$access_token)
-			debug ("Missing Access token. Retrieves from Google...");
-		if (!$access_token){
-			$access_token = \Google_Helper::getAccessToken($setup_data["client_id"], $setup_data["client_secret"], $setup_data["device_code"]);
+		$setup_data_new = \Google_Helper::verifyAccessToken($setup_data);
+		if ($setup_data_new && array_diff($setup_data, $setup_data_new)){
+			//Store the information
+			kvp_set("access_token",$setup_data_new["access_token"]);
 
-			if (!$access_token)
-				return false;
-			
-			//Convert to json
-			$access_token=json_encode($access_token);
-
-			//Store it persistent and in variable
-			kvp_set("access_token", $access_token);
-			$setup_data["access_token"] = $access_token;
+			$setup_data = $setup_data_new;
+		} else {
+			debug("Failed to retrieve access_token..");
+			return false;
 		}
-		debug ("Access token: ".$access_token);
-		
-			
+
+		/*
+		 * Authenticated. Do the calendar stuff
+		 */
 		$client = new \Google_Client();
 		$client->setApplicationName('HAC Calendar');
 		$client->setClientId($setup_data["client_id"]);
 		$client->setClientSecret($setup_data["client_secret"]);
 		$client->setScopes(array($setup_data["scope"]));
-
+		$client->setAccessToken($setup_data["access_token"]);
+		
 		//Add calendar
 		$cal = new \Google_CalendarService($client);
 
-		//Set access token
-		$client->setAccessToken($access_token);
+		//Get the list of calendars
+		$callist = $cal->calendarList->listCalendarList();
 
-		if ($client->getAccessToken()) {
-			//Get the list of calendars
-			$callist = $cal->calendarList->listCalendarList();
-
-			/*
-			 * Create a list of the calendars, skipping the
-			* ignore_calendars as set by the user
-			*/
-			$calendar = array();
-			for ($i=0; $i<sizeof($callist["items"]); $i++){
-				$summary = $callist["items"][$i]["summary"];
-				if (in_array($summary, $ignore_calendars)){
-					debug ("Skipping calendar: ".$summary);
-					continue;
-				}
-				$id = $callist["items"][$i]["id"];
-				$tz = $callist["items"][$i]["timeZone"];
-				$tzdiff = getTimezoneDiffFromUTC($tz);
-				array_push($calendar, array("summary"=>$summary, "id"=>$id, "timezone"=>$tz, "timezonediff"=>$tzdiff));
+		/*
+		 * Create a list of the calendars, skipping the
+		* ignore_calendars as set by the user
+		*/
+		$calendar = array();
+		for ($i=0; $i<sizeof($callist["items"]); $i++){
+			$summary = $callist["items"][$i]["summary"];
+			if (in_array($summary, $ignore_calendars)){
+				debug ("Skipping calendar: ".$summary);
+				continue;
 			}
+			$id = $callist["items"][$i]["id"];
+			$tz = $callist["items"][$i]["timeZone"];
+			$tzdiff = getTimezoneDiffFromUTC($tz);
+			array_push($calendar, array("summary"=>$summary, "id"=>$id, "timezone"=>$tz, "timezonediff"=>$tzdiff));
+		}
 
-			/* Define start time in Google format
-			 Start time should be NOW but formatted in e.g. 2012-08-08T06:00:00+02:00
-			*/
-			$timzoneDiff = getTimezoneDiffFromUTC($timezone);
-			$timeMin = subStr(date("c"), 0, 19).$timzoneDiff;
-			debug ("Start time: ".$timeMin);
+		/* Define start time in Google format
+		 Start time should be NOW but formatted in e.g. 2012-08-08T06:00:00+02:00
+		*/
+		$timzoneDiff = getTimezoneDiffFromUTC($timezone);
+		$timeMin = subStr(date("c"), 0, 19).$timzoneDiff;
+		debug ("Start time: ".$timeMin);
 
-			//Define stop time in Google format
-			$timeMax = subStr(date("c", strtotime("+".$daysToRetrieve." day")), 0, 19).$timzoneDiff;
-			debug ("End time: ".$timeMax);
+		//Define stop time in Google format
+		$timeMax = subStr(date("c", strtotime("+".$daysToRetrieve." day")), 0, 19).$timzoneDiff;
+		debug ("End time: ".$timeMax);
 
-			/* Get events from all calendars
-			 Info: https://developers.google.com/google-apps/calendar/v3/reference/events/list
-			*/
-			debug("Retrieving events in the calendars");
-			$events = array();
-			$filter = array("maxResults"=>10, "singleEvents"=>true, "orderBy"=>"startTime", "timeMin"=>$timeMin, "timeMax"=>$timeMax);
-			for ($i=0; $i<sizeof($calendar); $i++){
-				$id = $calendar[$i]["id"];
-				$calendarName = $calendar[$i]["summary"];
-					
-				$response = $cal->events->listEvents($id, $filter);
+		/* Get events from all calendars
+		 Info: https://developers.google.com/google-apps/calendar/v3/reference/events/list
+		*/
+		debug("Retrieving events in the calendars");
+		$events = array();
+		$filter = array("maxResults"=>10, "singleEvents"=>true, "orderBy"=>"startTime", "timeMin"=>$timeMin, "timeMax"=>$timeMax);
+		for ($i=0; $i<sizeof($calendar); $i++){
+			$id = $calendar[$i]["id"];
+			$calendarName = $calendar[$i]["summary"];
+				
+			$response = $cal->events->listEvents($id, $filter);
 
-				//var_dump($response);
+			//var_dump($response);
 
-				if (!isset($response["items"]))	//Check if there are any events within the timeframe
-					continue;
+			if (!isset($response["items"]))	//Check if there are any events within the timeframe
+				continue;
 
-				debug("Recieved events");
-				for ($j=0;$j<sizeof($response["items"]);$j++){
-					//Skip multi-day occurances that have already started
-					if (isset($response["items"][$j]["start"]["dateTime"])){
-						$jS = strtotime($response["items"][$j]["start"]["dateTime"]);
-						$jE = strtotime($response["items"][$j]["end"]["dateTime"]);
-						$dayevent = 0;
-					} else {
-						$jS = strtotime($response["items"][$j]["start"]["date"]);
-						$jE = strtotime($response["items"][$j]["end"]["date"]);
-						$dayevent = 1;
-					}
-					if ($jS<time())
-						continue;
-					//Add to array
-					array_push($events, array("calendarName"=>$calendarName,"title"=>$response["items"][$j]["summary"], "start"=>$jS,"end"=>$jE, "dayevent"=>$dayevent));
+			debug("Recieved events");
+			for ($j=0;$j<sizeof($response["items"]);$j++){
+				//Skip multi-day occurances that have already started
+				if (isset($response["items"][$j]["start"]["dateTime"])){
+					$jS = strtotime($response["items"][$j]["start"]["dateTime"]);
+					$jE = strtotime($response["items"][$j]["end"]["dateTime"]);
+					$dayevent = 0;
+				} else {
+					$jS = strtotime($response["items"][$j]["start"]["date"]);
+					$jE = strtotime($response["items"][$j]["end"]["date"]);
+					$dayevent = 1;
 				}
-					
+				if ($jS<time())
+					continue;
+				//Add to array
+				array_push($events, array("calendarName"=>$calendarName,"title"=>$response["items"][$j]["summary"], "start"=>$jS,"end"=>$jE, "dayevent"=>$dayevent));
 			}
 				
-			/* Sort the array */
-			usort($events, "google_calendar2_hacsvc\sortevents");
-
-			// We're not done yet. Remember to update the cached access token.
-			// Remember to replace $_SESSION with a real database or memcached.
-			kvp_set("access_token", $client->getAccessToken());
-			return $events;
 		}
-		return false;
+
+		/* Sort the array */
+		usort($events, "google_calendar2_hacsvc\sortevents");
+
+		// We're not done yet. Remember to update the cached access token.
+		kvp_set("access_token", $client->getAccessToken());
+		return $events;
+
 	}
 	const javascript = <<<EOT
 	this.formatTime = function (comma, dayevent, time){

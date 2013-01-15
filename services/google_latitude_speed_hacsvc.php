@@ -61,56 +61,42 @@ namespace google_latitude_speed_hacsvc {
 		 * Check if an device code exists. I.e. if the server has an ID
 		* to use a Google Account
 		* */
-		$device_code=@$setup_data["device_code"];
-		if ($device_code)
-			debug ("Device code: ".$device_code);
-		else
-			debug ("Missing device code registration. Retrieves data from Google for registration...");
-		if (!$device_code){
-			$device_code_call = \Google_Helper::getDeviceCode($setup_data["client_id"], $setup_data["scope"]);
-			if (!$device_code_call)
-				//Failed to retrieve the information. Quitting
-				return false;
+		$setup_data_new = \Google_Helper::verifyDeviceCode($setup_data);
+		if ($setup_data_new && array_diff($setup_data, $setup_data_new)){
 			//Store the information
-			kvp_set("device_code",$device_code_call["device_code"]);
-			kvp_set("user_code",$device_code_call["user_code"]);
-			kvp_set("verification_url",$device_code_call["verification_url"]);
-				
-			$setup_data["device_code"]= $device_code_call["device_code"];
+			kvp_set("device_code",$setup_data_new["device_code"]);
+			kvp_set("user_code",$setup_data_new["user_code"]);
+			kvp_set("verification_url",$setup_data_new["verification_url"]);
+		
+			$setup_data = $setup_data_new;
+		} else {
+			debug("Failed to retrieve device_code..");
+			return false;
 		}
-
+		
 		/*
 		 * Check for access token
 		*/
-		$access_token = @$setup_data["access_token"];
-		if (!$access_token)
-			debug ("Missing Access token. Retrieves from Google...");
-		if (!$access_token){
-			$access_token = \Google_Helper::getAccessToken($setup_data["client_id"], $setup_data["client_secret"], $setup_data["device_code"]);
-
-			if (!$access_token)
-				return false;
-				
-			//Convert to json
-			$access_token=json_encode($access_token);
-
-			//Store it persistent and in variable
-			kvp_set("access_token", $access_token);
-			$setup_data["access_token"] = $access_token;
+		$setup_data_new = \Google_Helper::verifyAccessToken($setup_data);
+		if ($setup_data_new && array_diff($setup_data, $setup_data_new)){
+			//Store the information
+			kvp_set("access_token",$setup_data_new["access_token"]);
+		
+			$setup_data = $setup_data_new;
+		} else {
+			debug("Failed to retrieve access_token..");
+			return false;
 		}
-		debug ("Access token: ".$access_token);
 			
 		$client = new \Google_Client();
 		$client->setApplicationName('HAC Latitude Speed');
 		$client->setClientId($setup_data["client_id"]);
 		$client->setClientSecret($setup_data["client_secret"]);		
 		$client->setScopes(array($setup_data["scope"]));
+		$client->setAccessToken($setup_data["access_token"]);
 
 		//Add calendar
 		$latitude = new \Google_LatitudeService($client);
-
-		//Set access token
-		$client->setAccessToken($access_token);
 
 		if ($client->getAccessToken()) {
 			$currentLocation = $latitude->currentLocation->get(array("granularity"=>"best"));
@@ -140,26 +126,5 @@ namespace google_latitude_speed_hacsvc {
 	}
 EOT;
 
-	function getTimezoneDiffFromUTC($timezone){
-		//Get timezone info
-		$origin_dtz = new \DateTimeZone($timezone);
-		$remote_dtz = new \DateTimeZone('UTC');
-		$origin_dt = new \DateTime("now", $origin_dtz);
-		$remote_dt = new \DateTime("now", $remote_dtz);
-		$offset = $origin_dtz->getOffset($origin_dt) - $remote_dtz->getOffset($remote_dt); //In secs
-		$negative = $offset<0 ? true : false;
-		$utcdiff_text = ($negative? "-" : "+" ).gmdate("H:i", $negative ? -$offset : $offset);
-		//debug("Timezone diff: ".$utcdiff_text);
-		return $utcdiff_text;
-	}
-	/**
-	 * Sorts the calender entries based on start time
-	 * @param object $a
-	 * @param object $b
-	 * @return number Sorting result
-	 */
-	function sortevents($a, $b){
-		return ($a["start"] - $b["start"]);
-	}
 }
 ?>
