@@ -1,4 +1,5 @@
 <?
+ini_set('max_execution_time', 300);
 /**
  * Used to call service objects. Normally a cron-job is calling the page to populate
  * the database with service information to be used by the UI component
@@ -31,4 +32,5 @@ if ($svcs == "all"){
 }
 
 echo "</pre></body></html>";
+
 ?>
