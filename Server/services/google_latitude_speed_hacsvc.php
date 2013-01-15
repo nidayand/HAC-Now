@@ -64,11 +64,13 @@ namespace google_latitude_speed_hacsvc {
 		* to use a Google Account
 		* */
 		$setup_data_new = \Google_Helper::verifyDeviceCode($setup_data);
-		if ($setup_data_new && array_diff($setup_data, $setup_data_new)){
+		if ($setup_data_new){
 			//Store the information
-			kvp_set("device_code",$setup_data_new["device_code"]);
-			kvp_set("user_code",$setup_data_new["user_code"]);
-			kvp_set("verification_url",$setup_data_new["verification_url"]);
+			if (array_diff($setup_data, $setup_data_new)){
+				kvp_set("device_code",$setup_data_new["device_code"]);
+				kvp_set("user_code",$setup_data_new["user_code"]);
+				kvp_set("verification_url",$setup_data_new["verification_url"]);
+			}
 
 			$setup_data = $setup_data_new;
 		} else {
@@ -80,7 +82,7 @@ namespace google_latitude_speed_hacsvc {
 		 * Check for access token
 		*/
 		$setup_data_new = \Google_Helper::verifyAccessToken($setup_data);
-		if ($setup_data_new && array_diff($setup_data, $setup_data_new)){
+		if ($setup_data_new){
 			//Store the information
 			kvp_set("access_token",$setup_data_new["access_token"]);
 
