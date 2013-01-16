@@ -1,8 +1,13 @@
 <?php
 /**
  * Retrieves the current weather conditions from klart.se
+ * 
+ * Setup:
+ * 1. Run Server/config.setup in a browser
+ * 2. Fill in the mandatory parameters
+ * 3. Run the Server/cron.php
  *
- * @author se31139
+ * @author nidayand
  *
  */
 namespace klart_hacsvc {
@@ -38,7 +43,7 @@ namespace klart_hacsvc {
 	}
 	function setup_data(){
 		return array(
-				array("key"=>"city_id", "value"=>"", "mandatory"=>1,"description"=>"The Klart.se identifier of the location. Goto <a href=\"services/klart_svc/get_id.php\" target=\"_blank\">services/klart_svc/get_id.php</a> to find the id")
+				array("key"=>"city_id", "value"=>"", "mandatory"=>1,"description"=>"The Klart.se identifier of the location. Goto http://www.klart.se, find the location that you wish to display. Look at the source code of that page and search for the integer number of \"city_id\"")
 		);
 	}
 

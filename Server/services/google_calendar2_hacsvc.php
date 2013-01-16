@@ -1,8 +1,21 @@
 <?php
 /**
- * Retrieves calendar information from Google
+ * Retrieves calendar information from Google from a specific account
+ * 
+ * Setup:
+ * 1. Go to Google API Console: https://code.google.com/apis/console/??
+ * 2. Create a project (if you don't already have one) and enable the Calendar API service
+ * 3. Create an "Client ID for installed applications" under API Access
+ * 3. Run Server/config.setup in a browser
+ * 4. Fill in the mandatory parameters (device_code, user_code, verification_url will be populated automatically)
+ * 5. Run the Server/cron.php
+ * 6. Refresh Server/config.setup in the browser
+ * 7. Go to the verification_url in the browser
+ * 8. Log in with the to-be-tied user account from where Calendar data will be retrieved
+ * 9. Use the user_code to tie the account to the service
+ * 10. Run the Server/cron.php
  *
- * @author se31139
+ * @author nidayand
  *
  */
 namespace google_calendar2_hacsvc {
@@ -45,7 +58,7 @@ namespace google_calendar2_hacsvc {
 				array("key"=>"client_id", "value"=>null, "mandatory"=>1,"description"=>"Go to https://code.google.com/apis/console/ and generate a 'Client ID for installed applications'. Sign up for the Calender API service"),
 				array("key"=>"client_secret", "value"=>null, "mandatory"=>1,"description"=>"Same as for client_id. The client_secret is needed for creating a new token if the previous one has expired"),
 				array("key"=>"scope", "value"=>"https://www.googleapis.com/auth/calendar.readonly", "mandatory"=>1,"description"=>"The scope of the request. Not necessary to change this value"),
-				array("key"=>"ignore_calendars", "value"=>null, "mandatory"=>1,"description"=>"Calendars to be ignored in the import. JSON format: [\"Svenska helgdagar\", \"Call log\", \"Week Numbers\"]"),
+				array("key"=>"ignore_calendars", "value"=>null, "mandatory"=>1,"description"=>"Calendars to be ignored in the import. JSON format: [\"Svenska helgdagar\", \"Call log\", \"Week Numbers\"]. If no calendar is to be removed use \"[]\""),
 				array("key"=>"timezone", "value"=>"Europe/Stockholm", "mandatory"=>1,"description"=>"Local timezone"),
 				array("key"=>"days", "value"=>"5", "mandatory"=>1,"description"=>"Days of data to retrive"),
 				array("key"=>"device_code", "value"=>null, "mandatory"=>2,"description"=>"Device code generated"),

@@ -1,8 +1,14 @@
 <?php
 /**
- * Retrieves the current weather conditions
+ * Presents new downloads of tv series via your SickBeard server. The script does currently
+ * not support authentication except via the SickBeard API (no username/password)
+ * 
+ * Setup:
+ * 1. Create an account at TVDB and an API key to be used by the service
+ * 2. Run Server/config.setup in a browser and configure params for the service as well
+ * 		as set the update interval and enable the service. 
  *
- * @author se31139
+ * @author nidayand
  *
  */
 namespace sickbeard_hacsvc {

@@ -1,9 +1,13 @@
 <?php
 /**
- * Presents new downloads of movies via
- * your CouchPotato Server
+ * Presents new downloads of movies via your CouchPotato Server. The script does currently
+ * not support authentication except via the CouchPotato API (no username/password)
+ * 
+ * Setup:
+ * Run Server/config.setup in a browser and configure params for the service as well
+ * as set the update interval and enable the service. 
  *
- * @author se31139
+ * @author nidayand
  *
  */
 namespace couchpotato_hacsvc {

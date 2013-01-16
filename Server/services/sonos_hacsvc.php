@@ -1,9 +1,13 @@
 <?php
 /**
- * Polls the local SOnos device for content and controls the device (play, next etc).
+ * Polls the local Sonos device for content and controls the device (play, next etc).
  * Initialization of the device is still needed from the sonos player
  *
- * @author se31139
+ * Setup:
+ * Run Server/config.setup in a browser and configure params for the service as well
+ * as set the update interval and enable the service. 
+ *
+ * @author nidayand
  *
  */
 namespace sonos_hacsvc {
@@ -41,7 +45,7 @@ namespace sonos_hacsvc {
 	}
 	function setup_data(){
 		return array(
-				array("key"=>"ip", "value"=>null, "mandatory"=>1,"description"=>"IP address of the Sonos component to control")
+				array("key"=>"ip", "value"=>null, "mandatory"=>1,"description"=>"IP address of the Sonos component to control. Can be found from a Sonos Controller (e.g. in Windows) - Help->About My Sonos System")
 		);
 	}
 

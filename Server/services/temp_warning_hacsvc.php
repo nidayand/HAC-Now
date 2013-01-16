@@ -1,8 +1,13 @@
 <?php
 /**
- * Checks room temperatures to a predefined limit and alerts if
- * lower than the limit
- * @author se31139
+ * Checks room temperatures to a predefined limit and alerts if lower than the limit.
+ * Requires the data to be available in the same MySQL server.
+ * 
+ * Setup:
+ * Run Server/config.setup in a browser and configure params for the service as well
+ * as set the update interval and enable the service. 
+ *
+ * @author nidayand
  *
  */
 namespace temp_warning_hacsvc {

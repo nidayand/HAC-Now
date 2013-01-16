@@ -2,7 +2,11 @@
 /**
  * Retrieves bus trafic information from Skånetrafiken
  *
- * @author se31139
+ * Setup:
+ * Run Server/config.setup in a browser and configure params for the service as well
+ * as set the update interval and enable the service. 
+ *
+ * @author nidayand
  *
  */
 namespace skanetrafiken_hacsvc {

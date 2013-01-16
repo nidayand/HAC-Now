@@ -1,8 +1,23 @@
 <?php
 /**
- * Retrieves Positioning information from Google
+ * Retrieves positioning information from Google from a specific account. An infobox will be
+ * display if the user is driving above a certain speed limit and if the accuracy is below
+ * a specified value
+ * 
+ * Setup:
+ * 1. Go to Google API Console: https://code.google.com/apis/console/??
+ * 2. Create a project (if you don't already have one) and enable the Latitude API service
+ * 3. Create an "Client ID for installed applications" under API Access.
+ * 3. Run Server/config.setup in a browser
+ * 4. Fill in the mandatory parameters (device_code, user_code, verification_url will be populated automatically)
+ * 5. Run the Server/cron.php
+ * 6. Refresh Server/config.setup in the browser
+ * 7. Go to the verification_url in the browser
+ * 8. Log in with the to-be-tied user account from where Calendar data will be retrieved
+ * 9. Use the user_code to tie the account to the service
+ * 10. Run the Server/cron.php
  *
- * @author se31139
+ * @author nidayand
  *
  */
 namespace google_latitude_speed_hacsvc {
@@ -41,7 +56,7 @@ namespace google_latitude_speed_hacsvc {
 	}
 	function setup_data(){
 		return array(
-				array("key"=>"client_id", "value"=>null, "mandatory"=>1,"description"=>"Go to https://code.google.com/apis/console/ and generate a 'Client ID for installed applications'. Sign up for the Calender API service"),
+				array("key"=>"client_id", "value"=>null, "mandatory"=>1,"description"=>"Go to https://code.google.com/apis/console/ and generate a 'Client ID for installed applications'. Sign up for the Latitude API service"),
 				array("key"=>"client_secret", "value"=>null, "mandatory"=>1,"description"=>"Same as for client_id. The client_secret is needed for creating a new token if the previous one has expired"),
 				array("key"=>"scope", "value"=>"https://www.googleapis.com/auth/latitude.current.best", "mandatory"=>1,"description"=>"The scope of the request. Not necessary to change this value"),
 				array("key"=>"device_code", "value"=>null, "mandatory"=>2,"description"=>"Device code generated. Internal usage only"),
