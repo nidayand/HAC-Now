@@ -1,6 +1,6 @@
 <?php
 /**
- * Retrieves calendar information from Google
+ * Retrieves Positioning information from Google
  *
  * @author se31139
  *
