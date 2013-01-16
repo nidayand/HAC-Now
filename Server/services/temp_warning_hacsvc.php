@@ -118,7 +118,7 @@ namespace temp_warning_hacsvc {
 		
 		var html = '<table width="100%" border="0"><tbody>';
 		for (var i=0; i<data.entries.length; i++){
-			var rowStr = '<tr><td>@</td><td>@&deg;</td><td><img src="@" style="width:24px"/></td></tr>';
+			var rowStr = '<tr><td>@</td><td>@&deg;</td><td><img src="@" style="width:18px"/></td></tr>';
 			var image = "";
 			switch(data.entries[i].trend){
 				case 1: image = imageUp;
