@@ -126,8 +126,8 @@ namespace sickbeard_hacsvc {
 		var html = '<table width="100%" border="0"><tbody>';
 		
 		for (var i=0; i<data.length; i++){
-			var rowStr = '<tr><th><img alt="" src="@" style=""></th></tr><tr><td style="vertical-align: top;"><span class="boxtext"><strong>'+ui.season_txt+' @, '+ui.episode_txt+' @: @</strong></span><br><span class="boxtextnormal">@</span></td></tr>';
-			html += js.stringChrParams(rowStr, "@", [data[i].banner, data[i].season, data[i].episode, data[i].title, data[i].overview]);
+			var rowStr = '<tr><th><img alt="" src="@" style=""></th></tr><tr><td style="vertical-align: top;"><span class="boxtext"><strong>@: '+ui.season_txt+' @, '+ui.episode_txt+' @: @</strong></span><br><span class="boxtextnormal">@</span></td></tr>';
+			html += js.stringChrParams(rowStr, "@", [data[i].banner, data[i].show, data[i].season, data[i].episode, data[i].title, data[i].overview]);
 		}
 		
 		html += '<tr><td> </td></tr></tbody></table>';
