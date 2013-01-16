@@ -34,7 +34,9 @@ namespace google_latitude_speed_hacsvc {
 	 */
 	function setup_ui(){
 		return array(
-				array("key"=>"title", "value"=>"V&auml;der", "mandatory"=>1,"description"=>"The title of the infobox")
+				array("key"=>"title", "value"=>"Title", "mandatory"=>1,"description"=>"The title of the infobox"),
+				array("key"=>"subtitle", "value"=>"Last seen %1 doing %2 km/h", "mandatory"=>1,"description"=>"Subtitle where %1 is date/time and %2 is speed"),
+				array("key"=>"date_format", "value"=>"kl H:MM:ss den d mmm", "mandatory"=>1,"description"=>"Date format for displaying when the last report was recorded. See http://blog.stevenlevithan.com/archives/date-time-format for available options")
 		);
 	}
 	function setup_data(){
@@ -46,7 +48,8 @@ namespace google_latitude_speed_hacsvc {
 				array("key"=>"user_code", "value"=>null, "mandatory"=>2,"description"=>"Code to be used with the URL for registration to an account"),
 				array("key"=>"verification_url", "value"=>null, "mandatory"=>2,"description"=>"URL for authentication"),
 				array("key"=>"speed_limit", "value"=>"5", "mandatory"=>1,"description"=>"If speed limit is above this value (in m/s) the map will be displayed. Use Google to translate from e.g. km/h to m/s via a simpel search - 20 km/h to m/s"),
-				array("key"=>"accuracy_limit", "value"=>"30", "mandatory"=>1,"description"=>"The map will only be displayed if the accuracy of the position is less that the value")
+				array("key"=>"accuracy_limit", "value"=>"30", "mandatory"=>1,"description"=>"The map will only be displayed if the accuracy of the position is less that the value"),
+				array("key"=>"speed_conv_js", "value"=>"3.6", "mandatory"=>1,"description"=>"Conversion value for m/s to desired value. m/s->km/h = 3.6,  m/s->mph = 2.23693629")
 		);
 	}
 
@@ -104,7 +107,7 @@ namespace google_latitude_speed_hacsvc {
 
 		if ($client->getAccessToken()) {
 			$currentLocation = $latitude->currentLocation->get(array("granularity"=>"best"));
-				
+
 			debug("Current location: ".json_encode($currentLocation));
 
 			// We're not done yet. Remember to update the cached access token.
@@ -112,27 +115,32 @@ namespace google_latitude_speed_hacsvc {
 			kvp_set("access_token", $client->getAccessToken());
 
 			/*
-			 * Only return if there is a speed value and it is equal or exceeds the predefined value and the 
-			 * accuracy is equal or less than the predefined value
-			 */
-			if (isset($currentLocation["speed"]) && $currentLocation["speed"]>= $setup_data["speed_limit"] 
+			 * Only return if there is a speed value and it is equal or exceeds the predefined value and the
+			* accuracy is equal or less than the predefined value
+			*/
+			if (isset($currentLocation["speed"]) && $currentLocation["speed"]>= $setup_data["speed_limit"]
 					&& $currentLocation["accuracy"]<=$setup_data["accuracy_limit"]){
 				debug("Location and speed is reported");
-				return $currentLocation;
+				return array("position"=>$currentLocation, "speed_conv_js"=>$setup_data["speed_conv_js"]);
 			}
 		}
 		return null;
 	}
 	const javascript = <<<EOT
 	this.content = function (widget, ui, data){
-		var html = '<table width="100%" border="0"><tbody><tr><td><img src="https://maps.googleapis.com/maps/api/staticmap?center='+data.latitude+','+data.longitude+'&zoom=12&size=400x200&markers=color:blue%7Clabel:S%7C'+data.latitude+','+data.longitude+'&sensor=false"/></td></tr></tbody></table>';
+		var html = '<div align="center"><img src="https://maps.googleapis.com/maps/api/staticmap?center='+data.position.latitude+','+data.position.longitude+'&zoom=12&size=300x200&markers=color:blue%7Clabel:S%7C'+data.position.latitude+','+data.position.longitude+'&sensor=false"/></div>';
 		
+		//Convert speed
+		var speed = parseInt(data.speed_conv_js*data.position.speed);
+		var recTime = dateFormat(parseInt(data.position.timestampMs), ui.date_format);
+		var subtitle = js.stringChrParams(ui.subtitle,'%1',[recTime]);
+		subtitle = js.stringChrParams(subtitle,'%2',[speed]);
 		//Update the widget
 		widget.infobox("option",{
 			"priority" : 1,
 			"content" : html,
 			"headline" : ui.title,
-			"subheadline" : null,
+			"subheadline" : subtitle,
 			"contentpadding" : true
 		});
 	}
