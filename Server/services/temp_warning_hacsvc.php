@@ -90,7 +90,7 @@ namespace temp_warning_hacsvc {
 		var html = '<table width="100%" border="0"><tbody>';
 		for (var i=0; i<data.entries.length; i++){
 			var rowStr = '<tr><td>@</td><td>@&deg;</td></tr>';
-			html += js.stringChrParams(rowStr, "@", [data.entries[i].name, (Math.round(data.entries[i].temperature*10)/10)]);
+			html += js.stringChrParams(rowStr, "@", [data.entries[i].name, (Math.round(data.entries[i].temperature*10)/10).toFixed(1)]);
 		}
 	
 		html += '<tr><td> </td></tr></tbody></table>';
