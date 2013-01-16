@@ -90,7 +90,7 @@ var js = {
 		stringChrParams: function (str, chr, paramsA){
 			for(var i=0;i<paramsA.length;i++){
 				pos = str.indexOf(chr);
-				str = str.substring(0,pos)+paramsA[i]+str.substring(pos+1);
+				str = str.substring(0,pos)+paramsA[i]+str.substring(pos+chr.length);
 			}
 			return str;
 		},
