@@ -34,9 +34,9 @@ namespace google_latitude_speed_hacsvc {
 	 */
 	function setup_ui(){
 		return array(
-				array("key"=>"title", "value"=>"Title", "mandatory"=>1,"description"=>"The title of the infobox"),
+				array("key"=>"title", "value"=>"Navigating with the car", "mandatory"=>1,"description"=>"The title of the infobox"),
 				array("key"=>"subtitle", "value"=>"Last seen %1 doing %2 km/h", "mandatory"=>1,"description"=>"Subtitle where %1 is date/time and %2 is speed"),
-				array("key"=>"date_format", "value"=>"kl H:MM:ss den d mmm", "mandatory"=>1,"description"=>"Date format for displaying when the last report was recorded. See http://blog.stevenlevithan.com/archives/date-time-format for available options")
+				array("key"=>"date_format", "value"=>"\"kl\" H:MM:ss \"den\" d mmm", "mandatory"=>1,"description"=>"Date format for displaying when the last report was recorded. See http://blog.stevenlevithan.com/archives/date-time-format for available options")
 		);
 	}
 	function setup_data(){
