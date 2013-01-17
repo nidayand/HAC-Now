@@ -1,4 +1,11 @@
 <?
+	header("Content-Type: text/html; charset=UTF-8");
+	header("Expires: -1");
+	header("Pragma: no-cache");
+	header("Cache-Control: max-age=0");
+	header("Cache-Control: no-cache");
+	header("Cache-Control: no-store");
+
 	ini_set('display_errors', 1);
 	ini_set('log_errors', 1);
 	error_reporting(E_ALL);
