@@ -12,7 +12,7 @@
 	/**
 	 * ADD YOUR API KEY HERE
 	 */
-	//define('PHPTVDB_API_KEY', '50B785A25AA1D2E2');
+	define('PHPTVDB_API_KEY', '');
 
 
 	//Include our files and we're done!

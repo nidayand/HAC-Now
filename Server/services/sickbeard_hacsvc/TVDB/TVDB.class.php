@@ -44,10 +44,11 @@
 		 * @param $url string The url to fetch data from
 		 * @return string The data
 		 **/
-		protected function fetchData($url) {
+		protected static function fetchData($url) {
 			$ch = curl_init($url);
 			curl_setopt($ch, CURLOPT_HEADER, 1);
 			curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+            curl_setopt($ch, CURLOPT_ENCODING, "");
 
 			$response = curl_exec($ch);
 
@@ -71,7 +72,7 @@
 		 * @param $params An array containing parameters for the request to thetvdb.com
 		 * @return string The data from thetvdb.com
 		 **/
-		protected function request($params) {
+		protected static function request($params) {
 
 			switch($params['action']) {
 

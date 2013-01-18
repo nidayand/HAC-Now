@@ -7,111 +7,111 @@
 	 */
 
 	class TV_Show extends TVDB {
-		
+
 		/**
 		 * thetvdb.com show id
-		 * 
+		 *
 		 * @access public
 		 * @var integer|string
 		 */
 		public $id;
-		
+
 		/**
 		 * Name of the TV show
-		 * 
+		 *
 		 * @access public
 		 * @var string
 		 */
 		public $seriesName;
-		
+
 		/**
 		 * Current status of the TV Show. Values are 'Ended', 'Continuing' (other unknown values possible)
-		 * 
+		 *
 		 * @access public
-		 * @var string 
+		 * @var string
 		 */
 		public $status;
-		
+
 		/**
 		 * First air date
-		 * 
+		 *
 		 * @access public
 		 * @var int Time in seconds since the epoc
 		 */
 		public $firstAired;
-		
+
 		/**
 		 * TV Network the show is on
-		 * 
+		 *
 		 * @access public
 		 * @var string
 		 */
 		public $network;
-		
+
 		/**
 		 * TV show runtime. Various formats (60 minutes, 30 mins)
-		 * 
+		 *
 		 * @access public
 		 * @var string
 		 */
 		public $runtime;
-		
+
 		/**
 		 * Array of genres the tv show is (strings)
-		 * 
+		 *
 		 * @access public
 		 * @var array contains array of genres (strings)
 		 */
 		public $genres;
-		
+
 		/**
 		 * Array of actor names
-		 * 
+		 *
 		 * @access public
 		 * @var array contains array of actors (strings)
 		 */
 		public $actors;
-		
+
 		/**
 		 * Overview of the TV Show
-		 * 
+		 *
 		 * @access public
-		 * @var string 
+		 * @var string
 		 */
 		public $overview;
-		
+
 		/**
 		 * Day of the week the TV show airs (Sunday, Monday, ...)
-		 * 
+		 *
 		 * @access public
 		 * @var string
 		 */
 		public $dayOfWeek;
-		
+
 		/**
 		 * Time the tv show airs
-		 * 
+		 *
 		 * @access public
 		 * @var string
 		 */
 		public $airTime;
-		
+
 		/**
 		 * Rating of the tv show
-		 * 
+		 *
 		 * @access public
 		 * @var string
 		 */
 		public $rating;
-		
+
 		/**
 		 * IMDB's id for the tv show (http://imdb.com/title/$imdbId)
-		 * 
+		 *
 		 * @access public
 		 * @var string
 		 */
 		public $imdbId;
-		
+
 		/**
 		 * Zap2It's id for the tv show (not sure how it is used yet)
 		 *
@@ -119,13 +119,16 @@
 		 * @var string
 		 */
 		public $zap2ItId;
-		
-		//PG:EDIT
-		public $banner;
-		public $fanart;
-		public $poster;
-		
-		
+
+		/**
+         * Banner image URL
+		 *
+		 * @access public
+		 * @var string
+		 */
+        public $banner;
+
+
 		/**
 		 * Constructor
 		 *
@@ -134,7 +137,7 @@
 		 * @return void
 		 **/
 		function __construct($config) {
-			
+
 			$this->id = (string)$config->id;
 			$this->seriesName = (string)$config->SeriesName;
 			$this->status = (string)$config->Status;
@@ -149,29 +152,25 @@
 			$this->rating = (string)$config->Rating;
 			$this->imdbId = (string)$config->IMDB_ID;
 			$this->zap2ItId = (string)$config->zap2it_id;
-			
-			//PG:EDIT
-			$this->banner = (string)$config->banner;
-			$this->fanart = (string)$config->fanart;
-			$this->poster = (string)$config->poster;
+            $this->banner = self::baseUrl.'banners/_cache/'.(string)$config->banner;
 		}
-		
-		
+
+
 		/**
 		 * Get a specific episode by season and episode number
 		 *
 		 * @var int $season required the season number
 		 * @var int $episode required the episode number
-		 * @return TV_Episode 
+		 * @return TV_Episode
 		 **/
 		public function getEpisode($season, $episode) {
-			$params = array('action' => 'get_episode', 
-							'season' => (int)$season, 
+			$params = array('action' => 'get_episode',
+							'season' => (int)$season,
 							'episode' => (int)$episode,
 							'show_id' => $this->id);
-			
+
 			$data = self::request($params);
-			
+
 			if ($data) {
 				$xml = simplexml_load_string($data);
 				return new TV_Episode($xml->Episode);
@@ -179,10 +178,10 @@
 				return false;
 			}
 		}
-        
+
         /**
          * Get a season of episodes
-         * 
+         *
          * @var int $season required the season number
          * @return array an array of TV_Episodes that occurred
          *               during the season
@@ -198,12 +197,40 @@
                 $episodes = array();
                 foreach($xml->Episode as $episode) {
                     if((int)$episode->SeasonNumber == $seasonNumber) {
-                        $episodes[] = $episode;
+                        $episodes[] = new TV_Episode($episode);
                     }
                 }
 
                 return $episodes;
             } else {
+                return false;
+            }
+        }
+
+
+        /**
+         * Get all episodes by show id
+         *
+         * @return array an array of TV_Episodes
+         **/
+         public function getAllEpisodes() {
+            $params = array('action' => 'get_all_episodes',
+                            'show_id' => $this->id);
+
+            $data = self::request($params);
+
+            if($data)
+            {
+                $xml = simplexml_load_string($data);
+                $episodes = array();
+                foreach($xml->Episode as $episode)
+                {
+                    $episodes[] = new TV_Episode($episode);
+                }
+                return $episodes;
+            }
+            else
+            {
                 return false;
             }
         }
