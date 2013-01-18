@@ -25,6 +25,15 @@ var hac = {
 			url += "?service=" + svc;
 		if (typeof loaddata !== "undefined" && loaddata)
 			url += "&loaddata=1";
+		
+		/*
+		 * Do not update if an service specific ajax call
+		 * is ongoing. This will avoid strange updates in the
+		 * UI while waiting for the widget to refresh
+		 */
+		if(ajaxLoading && (typeof svc == "undefined")){
+			return;
+		}
 
 		$.getJSON(url, function(data) {
 			for ( var i = 0; i < data.length; i++) {
@@ -127,6 +136,7 @@ var js = {
 };
 
 // Register a ajaxSend function
+var ajaxLoading = false;
 $(document).ajaxSend(
 		function(event, jqxhr, settings) {
 			/*
@@ -136,6 +146,7 @@ $(document).ajaxSend(
 			if (settings.url.indexOf("cron.php") == -1
 					&& settings.url.indexOf("data.php") == -1) {
 				js.showLoadingWidget();
+				ajaxLoading = true;
 			}
 		});
 
@@ -150,6 +161,7 @@ $(document).ajaxComplete(
 			if (settings.url.indexOf("cron.php") == -1
 					&& settings.url.indexOf("data.php") == -1) {
 				js.hideLoadingWidget();
+				ajaxLoading = false;
 			}
 		});
 
