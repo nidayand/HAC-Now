@@ -4,40 +4,64 @@
  * Includes all service files
  * @return array : available services (namespaces)
  */
-function includeSvcObjects(){
+function includeSvcObjects($diskCheck = false){
 	global $svc_dir;
 	global $svcext_dir;
 	global $root;
 	global $svcfileend;
 	global $svcextfileend;
-	
+	global $db_defaultdb;
+
 	//Array of all service
 	$response = array();
-	
-	//Add all services
-	$res = scandir($root.$svc_dir);
-	for ($i=0; $i<sizeof($res); $i++) {
-		//Skip certain files
-		if ((strpos($res[$i],".")==0) || (strpos($res[$i],".tmpl")!=0) || (!strpos($res[$i],$svcfileend)))
-			continue;
-			
-		//Include services
-		include_once $root.$svc_dir.$res[$i];
-			
-		$svc = substr($res[$i],0,strpos($res[$i],"."));
-		array_push($response, $svc);
+
+	if ($diskCheck){
+		//Add all services
+		$res = scandir($root.$svc_dir);
+		for ($i=0; $i<sizeof($res); $i++) {
+			//Skip certain files
+			if ((strpos($res[$i],".")==0) || (strpos($res[$i],".tmpl")!=0) || (!strpos($res[$i],$svcfileend)))
+				continue;
+
+			//Include services
+			include_once $root.$svc_dir.$res[$i];
+
+			$svc = substr($res[$i],0,strpos($res[$i],"."));
+			array_push($response, $svc);
+		}
+		
+		//Add all possible extensions
+		$res = scandir($root.$svcext_dir);
+		for ($i=0; $i<sizeof($res); $i++) {
+			//Skip certain files
+			if ((strpos($res[$i],".")==0) || (strpos($res[$i],".tmpl")!=0) || (!strpos($res[$i],$svcextfileend)))
+				continue;
+				
+			//Include services
+			include_once $root.$svcext_dir.$res[$i];
+		}
+	} else {
+		/*
+		 * Check the kvp table for enabled
+		 * services
+		 */
+		$sql = "select distinct context from `".$db_defaultdb."`.`kvp` where `type`='data' and `key`='_enabled' and `value`='true'";
+		$items = dbSelect($sql);
+		
+		if (dbIsNotEmpty($items)){
+			foreach ($items as $row){
+				$path = $root.$svc_dir.$row["context"].".php";
+				include_once $root.$svc_dir.$row["context"].".php";
+				array_push($response, $row["context"]);
+				
+				//Check for extension
+				if (@is_file($root.$svcext_dir.$row["context"]."ext.php")){
+					include_once $root.$svcext_dir.$row["context"]."ext.php";
+				}
+			}
+		}
 	}
-	
-	//Add all possible extensions
-	$res = scandir($root.$svcext_dir);
-	for ($i=0; $i<sizeof($res); $i++) {
-		//Skip certain files
-		if ((strpos($res[$i],".")==0) || (strpos($res[$i],".tmpl")!=0) || (!strpos($res[$i],$svcextfileend)))
-			continue;
-			
-		//Include services
-		include_once $root.$svcext_dir.$res[$i];	
-	}	
+
 	return $response;
 }
 
@@ -54,11 +78,11 @@ function validateSvc($svc){
 		debug("The service is not enabled");
 		return false;
 	}
-	
+
 	//Retrieve the parameters
 	$setupCall = $svc."\setup_data";
 	$setup = $setupCall();
-	
+
 	//Iterate through the list and check the mandatory parameters
 	for($j=0; $j<sizeof($setup); $j++){
 		if ($setup[$j]["mandatory"]==1 && (kvp_get($setup[$j]["key"], $svc) == false)){
@@ -76,11 +100,11 @@ function validateSvc($svc){
 function callSvc($svc, $skipIntervalCheck=false){
 	global $db_defaultdb;
 	debug($svc, true);
-	
+
 	/*
 	 * Check that all mandatory parameters have been set
-	 * for the specific service
-	 */
+	* for the specific service
+	*/
 	if(!validateSvc($svc)){
 		debug("Mandatory parameters have not been set for the service. Skipping data_load...");
 		return false;
@@ -88,7 +112,7 @@ function callSvc($svc, $skipIntervalCheck=false){
 
 	/*
 	 * Call the load_data method in the service
-	 */
+	*/
 	$load_data = callLoadData($svc, $skipIntervalCheck);
 
 	/* If false, do not continue and if null reset row data
@@ -109,15 +133,15 @@ function callSvc($svc, $skipIntervalCheck=false){
 	* the UI component to read
 	*/
 	$ui_data = json_encode($load_data);
-	
+
 	$response = setData($svc, $ui_data);
 	switch ($response){
 		case 0: debug ("No updates to data");
-				break;
+		break;
 		case 1: debug ("Updated data into infobox_data table");
-				break;
+		break;
 		case 2: debug ("Inserted data into infobox_data table");
-				break;
+		break;
 	}
 
 }
@@ -147,14 +171,14 @@ function callLoadData($svc, $skipIntervalCheck=false){
 			$setup["infobox_data"] = $items[$i]["data"];
 		}
 	}
-	
+
 	/*
 	 * Check if the service has a pull limit defined
 	* in the settings if it should be checked
 	*/
 	$pullInterval = kvp_get("_pull_interval", $svc);
 	$pullInterval = ($pullInterval==false? 0: $pullInterval);
-	
+
 	if (!$skipIntervalCheck && isset($setup["infobox_updated"]) && $pullInterval>0){
 		$now = time();
 		$last_updated = $setup["infobox_updated"];
@@ -162,12 +186,12 @@ function callLoadData($svc, $skipIntervalCheck=false){
 			debug("Last update is not higher than the current Pull Interval key (".($now - $last_updated)." secs < ".$pullInterval."). Will not pull for data...");
 			return false;
 		}
-	}	
+	}
 	/*
 	 * Call the load_data method
 	*/
 	$response = callMethod($svc, "load_data", $setup);
-	
+
 	//Update timestamp if a proper result
 	if ($response !== false && $response !==null){
 		updateTimestamp($svc);
@@ -197,7 +221,7 @@ function callMethod($svc, $method, $params){
 	} else {
 		debug("Extension does not exist, calling method: ".$method);
 		$methodCall = $svc."\\".$method;
-		$response = $methodCall($params);		
+		$response = $methodCall($params);
 	}
 
 	return $response;
