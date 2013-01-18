@@ -5,7 +5,7 @@ include_once '../database/db.php';
 include_once '../includes/services.php';
 
 //Include all files
-$allSvc = includeSvcObjects();
+$allSvc = includeSvcObjects(true);
 
 /*
  Check if information has been posted
