@@ -150,8 +150,7 @@
 	*	Example: deleteData("weather_svc");
 	*/
 	function deleteData($svc){
-		global $db_defaultdb;
-		return dbDelete("update `".$db_defaultdb."`.`infobox_data` set `state`=0, updated=CURRENT_TIMESTAMP, `data`='{}' where context=?", array($svc));
+		return setData($svc, "{}", 0); //Reset the values
 	}
 	
 	/**
@@ -160,7 +159,7 @@
 	 * @param JSON $ui_data Data to be saved
 	 * @return number 0=No update needed, 1=Data is update, 2=Insert of table data
 	 */
-	function setData($svc, $ui_data){
+	function setData($svc, $ui_data, $state=1){
 		global $db_defaultdb;
 		/*
 		 * Compare the data with the existing (if available) and if changed
@@ -170,8 +169,8 @@
 		if (dbIsNotEmpty($items)){
 			//Check if update
 			$table_data = dbGetColumnValueFromRow1($items, "data");
-			if ($table_data !== $ui_data) {
-				dbUpdate("update `".$db_defaultdb."`.`infobox_data` set data=?, state=1, updated=CURRENT_TIMESTAMP where iddata=?", array($ui_data, dbGetColumnValueFromRow1($items, 'iddata')));
+			if ($table_data !== $ui_data || $state === 0) {
+				dbUpdate("update `".$db_defaultdb."`.`infobox_data` set data=?, state=".$state.", updated=CURRENT_TIMESTAMP where iddata=?", array($ui_data, dbGetColumnValueFromRow1($items, 'iddata')));
 				return 1;
 			} else {
 				return 0;
@@ -179,7 +178,7 @@
 		
 		} else {
 			//Do insert
-			dbInsert("INSERT INTO `".$db_defaultdb."`.`infobox_data` (`context`, `data`) VALUES (?,?)", array($svc, $ui_data));
+			dbInsert("INSERT INTO `".$db_defaultdb."`.`infobox_data` (`context`, `data`, `state`) VALUES (?,?,?)", array($svc, $ui_data, $state));
 			return 2;
 		}		
 	}
