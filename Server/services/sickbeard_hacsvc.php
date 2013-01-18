@@ -104,8 +104,8 @@ namespace sickbeard_hacsvc {
 			if($show){
 				$episodeInfo=$show->getEpisode($season, $episode);
 			}
-		
-			array_push($resp, array("episode"=>$episode, "season"=>$season, "show"=>$showName, "banner"=>$tvdb_prepend.$show->banner, "title"=>$episodeInfo->name, "overview"=>$episodeInfo->overview, "date"=>$date));
+		    
+			array_push($resp, array("episode"=>$episode, "season"=>$season, "show"=>$showName, "banner"=>(strpos($show->banner,$tvdb_prepend) !== false ? $tvdb_prepend.$show->banner : $show->banner), "title"=>$episodeInfo->name, "overview"=>$episodeInfo->overview, "date"=>$date));
 		}
 		//Get the latest time of entries
 		if (isset($data["data"][0]["date"])){
