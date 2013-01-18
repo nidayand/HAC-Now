@@ -16,6 +16,11 @@ if ($loaddata){
 	//Include the service
 	include_once $svc_dir.$svcs.".php";
 	
+	//Include a possible extension
+	if (@is_file($root.$svcext_dir.$svcs."ext.php")){
+		include_once $root.$svcext_dir.$svcs."ext.php";
+	}	
+	
 	//Call the service
 	callSvc($svcs);
 }
